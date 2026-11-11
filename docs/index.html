@@ -279,31 +279,6 @@
       box-shadow: 0 24px 56px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
-    .preview-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .preview-tab {
-      background: #14141c;
-      border: 1px solid #252535;
-      color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .preview-tab.active, .preview-tab:hover {
-      background: rgba(255, 107, 43, 0.15);
-      border-color: rgba(255, 107, 43, 0.4);
-      color: #ff9d66;
-    }
 
     .screenshot-viewer {
       width: 100%;
@@ -590,18 +565,10 @@
         <span>📦 Bebas Bloatware</span>
       </div>
 
-      <!-- Showcase Screenshot Preview -->
+      <!-- Showcase Screenshot -->
       <div class="preview-section">
-        <div class="preview-tabs">
-          <button class="preview-tab active" onclick="switchShot('assets/screenshot-dashboard.jpg', this)">
-            🖥️ Dashboard Utama
-          </button>
-          <button class="preview-tab" onclick="switchShot('assets/screenshot-packages.jpg', this)">
-            📦 Paket Runtime &amp; Multi-PHP
-          </button>
-        </div>
         <div class="screenshot-viewer" onclick="openLightbox(document.getElementById('active-shot').src)">
-          <img id="active-shot" src="assets/screenshot-dashboard.jpg" alt="DraGon — Dashboard Lingkungan Development Lokal" />
+          <img id="active-shot" src="assets/showcase.jpg" alt="DraGon — Dashboard Lingkungan Development Lokal (.dra)" />
         </div>
       </div>
     </section>
