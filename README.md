@@ -5,6 +5,7 @@
 # DraGon
 ### Lingkungan Development Lokal Windows Modern & Cepat (.dra)
 
+[![Website](https://img.shields.io/badge/Website-dningratx.github.io%2Fdragon-ff6b2b.svg)](https://dningratx.github.io/dragon/)
 [![Release](https://img.shields.io/github/v/release/dningratx/dragon?color=ff6b2b&label=Versi)](https://github.com/dningratx/dragon/releases/latest)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://github.com/dningratx/dragon)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20Windows-512bd4.svg)](https://dotnet.microsoft.com/)
