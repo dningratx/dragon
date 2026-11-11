@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="DraGon.App/DraGon.App.csproj" />
+  <Project Path="DraGon.Core/DraGon.Core.csproj" />
+  <Project Path="DraGon.Elevator/DraGon.Elevator.csproj" />
+  <Project Path="DraGon.Installer/DraGon.Installer.csproj" />
+  <Project Path="DraGon.Tests/DraGon.Tests.csproj" />
+</Solution>

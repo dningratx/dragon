@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>DraGon-Setup</AssemblyName>
+    <ApplicationTitle>DraGon Setup Wizard</ApplicationTitle>
+    <ApplicationIcon>Assets\dragon-icon.ico</ApplicationIcon>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\dragon-icon.ico" />
+    <Resource Include="Assets\dragon-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DraGon.Core\DraGon.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Payload\DraGonPayload.zip"
+                      Condition="Exists('Payload\DraGonPayload.zip')"
+                      LogicalName="DraGonPayload.zip" />
+  </ItemGroup>
+
+</Project>
