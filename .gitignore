@@ -1,0 +1,11 @@
+# Ignore build outputs and binaries
+*.exe
+*.zip
+*.dll
+*.pdb
+*.msi
+bin/
+obj/
+dist/
+.vs/
+.idea/

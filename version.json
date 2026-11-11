@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "name": "DraGon v1.0.0",
+  "releaseDate": "2026-11-11",
+  "minWindowsVersion": "10.0.19041",
+  "architecture": "win-x64",
+  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.0.0/DraGon-Setup.exe",
+  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.0.0/DraGon-win-x64.zip",
+  "changelog": [
+    "Rilis resmi perdana DraGon — Lingkungan Development Lokal Windows (.dra)",
+    "Antarmuka ringkas, modern, dan responsif (WPF .NET 10)",
+    "Dukungan multi-versi PHP (PHP 8.3 LTS, 8.4, 8.2)",
+    "Database MariaDB 11.4 LTS siap pakai lengkap dengan inisialisasi otomatis",
+    "Web Server ganda: Apache HTTP Server & Nginx dengan SSL otomatis (.dra)",
+    "Sinkronisasi domain lokal ke file hosts Windows 127.0.0.1",
+    "Pembuatan proyek kilat: Standar (PHP/Web), Laravel (Composer), WordPress (wordpress.org), dan Git Clone",
+    "Pintasan terminal bawaan dengan path runtime terinjeksi otomatis"
+  ]
+}
