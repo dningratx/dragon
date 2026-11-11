@@ -436,6 +436,41 @@
       font-size: 0.98rem;
     }
 
+    .smartscreen-tip {
+      margin-top: 24px;
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 14px;
+      max-width: 660px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 0.86rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .smartscreen-tip strong {
+      color: #f1f5f9;
+    }
+
+    .smartscreen-tip em {
+      color: #fed7aa;
+      font-style: normal;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .smartscreen-tip .tip-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -714,6 +749,14 @@
           <span>📄</span>
           <span>Catatan Rilis (Changelog)</span>
         </a>
+      </div>
+
+      <div class="smartscreen-tip">
+        <div class="tip-icon">🛡️</div>
+        <div class="tip-content">
+          <strong>Catatan Instalasi Windows (SmartScreen):</strong><br />
+          Jika muncul jendela <em>"Windows protected your PC"</em> saat pertama kali membuka installer, ini adalah perlindungan standar Windows untuk aplikasi rilis baru. Cukup klik <strong>"More info"</strong> lalu pilih <strong>"Run anyway"</strong> (Tetap jalankan).
+        </div>
       </div>
     </section>
   </main>

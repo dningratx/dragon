@@ -76,6 +76,10 @@ Dapatkan versi rilis stabil terbaru langsung dari GitHub Releases:
 
 ## 🛠️ Panduan Pemasangan
 
+> [!TIP]
+> **Catatan Windows Defender SmartScreen:**  
+> Jika muncul jendela perlindungan *“Windows protected your PC”* saat pertama kali menjalankan berkas installer, ini wajar untuk rilis perdana. Cukup klik **“More info”** lalu pilih **“Run anyway”** (Tetap jalankan).
+
 1. Unduh berkas [**`DraGon-Setup.exe`**](https://github.com/dningratx/dragon/releases/download/v1.0.0/DraGon-Setup.exe).
 2. Jalankan berkas installer tersebut (pilih direktori instalasi, default: `C:\DraGon`).
 3. Selesaikan wizard instalasi dan jalankan **DraGon**.
