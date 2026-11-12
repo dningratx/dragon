@@ -1,13 +1,69 @@
-# DraGon — Lingkungan Development Lokal untuk Windows (`.dra`)
+<div align="center">
 
-**DraGon** adalah aplikasi desktop Windows modern untuk mengelola lingkungan pengembangan web lokal (khususnya proyek **PHP**, **Laravel**, dan **Node.js**) dengan dukungan domain lokal berakhiran **`.dra`** (seperti `tokoku.dra`, `iklas.dra`, `api.dralogy.dra`) baik melalui protokol **HTTP** maupun **HTTPS Lokal**.
+# DraGon (.dra) — Local Development Environment
+
+[![Release](https://img.shields.io/badge/Release-v1.2.0-orange.svg)](https://github.com/dningratx/dragon/releases)
+[![Website](https://img.shields.io/badge/Website-dningratx.github.io%2Fdragon-success.svg)](https://dningratx.github.io/dragon/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://github.com/dningratx/dragon)
+[![Framework](https://img.shields.io/badge/.NET-10.0%20Windows-512bd4.svg)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/License-Freeware-emerald.svg)](https://github.com/dningratx/dragon)
+
+<br/>
+
+**DraGon** adalah lingkungan pengembangan web lokal (*local development environment*) modern untuk sistem operasi Windows yang dirancang sebagai alternatif ringan, cepat, modular, dan terintegrasi penuh untuk mengelola proyek **PHP**, **Laravel**, dan **Node.js** dengan dukungan domain lokal **`.dra`** (seperti `tokoku.dra`, `api.dra`) melalui HTTP dan HTTPS lokal.
 
 > **Catatan Penting Domain `.dra`:**  
-> Seluruh domain berakhiran `.dra` hanya dipetakan ke alamat loopback lokal (`127.0.0.1`) pada komputer Anda sendiri. Domain `.dra` **tidak** dapat diakses secara publik melalui internet.
+> Seluruh domain berakhiran `.dra` hanya dipetakan ke alamat loopback lokal (`127.0.0.1`) pada komputer Anda. Domain `.dra` **tidak** dapat diakses secara publik melalui internet.
+
+</div>
 
 ---
 
-## 1. Keputusan Teknis & Arsitektur
+## 🚀 Unduh DraGon v1.2.0 Terbaru
+
+Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
+
+| Paket Distribusi | Tipe | Deskripsi | Tautan Unduh |
+| :--- | :--- | :--- | :--- |
+| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Setup.exe) |
+| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-win-x64.zip) |
+| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.2.0.zip**](https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Patch-v1.2.0.zip) |
+
+---
+
+## 🌟 Fitur Unggulan
+
+### 1. 🌐 Net Installer Modular & Komponen On-Demand
+- **Installer Awal Ramping Tanpa Runtime Bawaan:** File installer tidak lagi memuat berkas komponen berat di awal, sehingga proses unduh awal sangat cepat.
+- **Pilihan Komponen Fleksibel:** Pengguna bebas memilih komponen yang diinginkan (Apache 2.4, Nginx 1.26, PHP 8.3 LTS, PHP 8.4, MariaDB 11.4 LTS, PostgreSQL 17, Composer, Node.js 22 LTS, phpMyAdmin, Python 3.12).
+- **Preset 1-Klik:** Pilihan cepat *Standar Apache*, *Stack Nginx*, *Pilih Semua*, atau *Hanya Inti DraGon*.
+- **Estimasi Unduhan Real-Time:** Menghitung total MB perkiraan unduhan secara langsung saat checkbox dipilih atau diubah.
+
+### 2. 🐘 Multi-Versi PHP Berdampingan
+- Beralih versi PHP aktif secara instan hanya dengan 1 klik melalui *PHP Version Switcher*.
+- Mendukung preset rilis **PHP 8.3 LTS** (Rekomendasi Laravel), **PHP 8.4** (Terbaru), dan **PHP 8.2**.
+- Otomatis mengaktifkan ekstensi populer (`curl`, `fileinfo`, `gd`, `mbstring`, `mysqli`, `openssl`, `pdo_mysql`, `zip`).
+
+### 3. 🐬 Database MariaDB 11.4 LTS & PostgreSQL
+- Server database relasional SQL lokal cepat, otomatis inisialisasi folder data dan pengguna `root`.
+- Integrasi tombol pintasan langsung ke **phpMyAdmin Web GUI** dan **HeidiSQL**.
+
+### 4. 🔒 Otomatisasi SSL Lokal (`https://*.dra`)
+- DraGon Local Root CA diterbitkan secara native menggunakan kriptografi X.509 .NET 10 tanpa OpenSSL eksternal.
+- Sertifikat leaf otomatis dibuat per domain `.dra`.
+- Tombol **"Percayai Root CA di Windows"** untuk mendaftarkan Root CA ke penyimpanan sertifikat pengguna (`CurrentUser\Root`).
+
+### 5. ⚡ Deteksi & Scaffolding Proyek Instan
+- Template bawaan siap pakai: **Standar (PHP/Web)**, **Laravel** (`composer create-project`), **WordPress** (unduh resmi `wordpress.org`), dan **Git Clone**.
+- Tombol cepat untuk `php artisan serve`, `composer install`, dan `npm run dev` yang berjalan sebagai proses latar belakang terkelola.
+
+### 6. 🔄 Sistem Pembaruan Cerdas (Delta Update)
+- Fitur **"Periksa Pembaruan"** di menu Pengaturan.
+- Hanya mengunduh file patch yang berubah tanpa perlu mengunduh ulang runtime maupun merusak data database lokal.
+
+---
+
+## 🛠️ Keputusan Teknis & Struktur Proyek
 
 Aplikasi dibangun menggunakan **.NET 10 (LTS)**, **C#**, **WPF**, dan pola arsitektur **MVVM (`CommunityToolkit.Mvvm`)**:
 
@@ -15,96 +71,32 @@ Aplikasi dibangun menggunakan **.NET 10 (LTS)**, **C#**, **WPF**, dan pola arsit
 DRAGON/
 ├── DraGon.slnx                 # Solution file (.NET 10)
 ├── DraGon.Core/                # Logika bisnis, layanan proses, SSL lokal, Multi-PHP, & auto-update
-│   ├── Models/                 # AppSettings, ProjectItem, ServiceState, RuntimePackageInfo, UpdateInfo
-│   └── Services/               # DraGonPaths, ValidationService, AppLogger, ConfigurationService,
-│                               # ProjectDetectorService, HostsFileService, LocalSslService,
-│                               # PhpVersionManagerService, RuntimeInstallerService, AppUpdateService,
-│                               # ProjectDevProcessManager, PortUtility, ServerConfigGenerator,
-│                               # RuntimePackageCatalogService, ServiceProcessManager, ExternalLauncherService
-├── DraGon.Elevator/            # Helper CLI ringan untuk meminta elevasi UAC (runas) hanya saat
-│                               # memperbarui entri # [DraGon-Managed] pada file hosts Windows
-├── DraGon.App/                 # Aplikasi Desktop WPF (MVVM, Dark & Light Theme, Auto-Updater)
-│   ├── Converters/             # Value converter status layanan, domain, notifikasi, & navigasi
-│   ├── Themes/                 # ThemeManager (Tema Gelap default & Tema Terang)
-│   ├── ViewModels/             # MainViewModel
-│   └── MainWindow.xaml         # Antarmuka Dashboard, Projects, Services, Packages, Settings (Card Update)
+├── DraGon.Elevator/            # Helper CLI ringan untuk meminta elevasi UAC (hosts file)
+├── DraGon.App/                 # Aplikasi Desktop WPF (MVVM, Dark/Light Theme, Auto-Updater)
 ├── DraGon.Installer/           # Wizard Installer Mandiri GUI (DraGon-Setup.exe)
 ├── DraGon.Tests/               # Pengujian unit otomatis 53 skenario (xUnit)
+├── docs/                       # Halaman dokumentasi web (GitHub Pages)
 └── scripts/
     ├── publish-release.ps1     # Skrip pembuat paket distribusi rilis portabel (ZIP)
-    ├── build-installer.ps1     # Skrip pembuat standalone installer GUI (DraGon-Setup.exe)
-    └── publish-patch.ps1       # Skrip pembuat paket patch inkremental (Delta Update ZIP & Manifest)
+    ├── build-installer.ps1     # Skrip pembuat standalone installer GUI (Online/Offline)
+    └── publish-patch.ps1       # Skrip pembuat paket patch inkremental (Delta Update)
 ```
 
 ---
 
-## 2. Fitur Lengkap yang Sudah Berfungsi
-
-### A. Fondasi MVP
-1. **Dashboard**: Status layanan Web Server (Nginx/Apache), PHP FastCGI, dan Database (MariaDB/MySQL), tombol **Start All** / **Stop All**, kontrol per-layanan, informasi port aktif, daftar proyek terbaru, dan tombol cepat membuka folder, terminal, serta browser.
-2. **Pengelolaan Proyek & Deteksi Laravel/Node.js**: Tambah proyek melalui dialog pilih folder, pindai otomatis folder workspace, ubah nama proyek & domain `.dra`, hapus proyek dari daftar tanpa menghapus folder sumber di disk, deteksi proyek Laravel (`artisan` + `composer.json`) dan Node.js (`package.json`), serta tombol pintasan `php artisan serve`, `composer install`, dan `npm install`.
-3. **Domain Lokal `.dra` & Helper UAC**: Validasi domain `.dra`, pemeriksaan konflik terhadap proyek lain dan entri eksternal di `hosts`, pembuatan salinan cadangan otomatis di `%LocalAppData%\DraGon\backups\`, penandaan baris `# [DraGon-Managed]`, serta elevasi UAC on-demand melalui `DraGon.Elevator.exe`.
-
-### B. Fitur Tahap Lanjutan (Roadmap) yang Telah Diimplementasikan
-1. **HTTPS Lokal Otomatis untuk Domain `.dra` ([`LocalSslService`](DraGon.Core/Services/LocalSslService.cs))**:
-   - Membuat sertifikat **DraGon Local Development Root CA** secara native menggunakan kriptografi X.509 .NET 10 tanpa bergantung pada OpenSSL eksternal.
-   - Menerbitkan sertifikat SSL leaf per-domain `.dra` (`*.crt` dan `*.key` dengan ekstensi SAN untuk `<domain>.dra`, `*.<domain>.dra`, dan `127.0.0.1`) di `%LocalAppData%\DraGon\certs\`.
-   - Menyediakan tombol **"Percayai Root CA di Windows"** untuk mendaftarkan Root CA ke penyimpanan sertifikat pengguna (`CurrentUser\Root`) tanpa membutuhkan hak Administrator penuh.
-   - Mengonfigurasi blok HTTPS (`listen 127.0.0.1:443 ssl` di Nginx dan `<VirtualHost 127.0.0.1:8443>` dengan `SSLEngine on` di Apache) secara otomatis.
-2. **Dukungan Multi-Versi PHP ([`PhpVersionManagerService`](DraGon.Core/Services/PhpVersionManagerService.cs))**:
-   - Memindai beberapa versi PHP secara berdampingan di dalam `%LocalAppData%\DraGon\runtimes\php\<versi>` maupun PATH sistem.
-   - Menyediakan pemilih **PHP Version Switcher** di halaman **Services** untuk mengganti versi PHP aktif kapan saja.
-   - Menyiapkan `php.ini` otomatis (dari `php.ini-development`) dengan mengaktifkan ekstensi penting untuk Laravel (`curl`, `fileinfo`, `mbstring`, `openssl`, `pdo_mysql`, `mysqli`, `zip`).
-3. **Dukungan Node.js & Proses Dev Latar Belakang ([`ProjectDevProcessManager`](DraGon.Core/Services/ProjectDevProcessManager.cs))**:
-   - Menjalankan dan menghentikan proses `npm run dev` (Vite / frontend) atau `php artisan serve` sebagai proses latar belakang terkelola langsung pada kartu proyek, lengkap dengan pemantauan PID, pencatatan log ke `%LocalAppData%\DraGon\logs\project-<domain>.log`, dan penghentian bersih saat aplikasi ditutup.
-4. **Pengunduh & Importer Arsip Runtime Resmi + Skrip Distribusi ([`RuntimeInstallerService`](DraGon.Core/Services/RuntimeInstallerService.cs))**:
-   - Tombol **"Unduh & Pasang Resmi"** untuk mengunduh langsung paket ZIP resmi (Nginx, MariaDB, Node.js LTS) lengkap dengan indikator persentase unduhan dan ekstraksi otomatis.
-   - Tombol **"Impor File ZIP Resmi..."** untuk mengekstrak arsip `.zip` resmi apa pun (termasuk menambahkan versi PHP baru secara berdampingan) dan merapikan folder bersarang secara otomatis.
-   - Tombol **"Inisialisasi Database MariaDB"** yang menjalankan `mysql_install_db.exe` secara otomatis jika folder `data` belum dibuat.
-   - Skrip distribusi `scripts/publish-release.ps1` untuk membangun paket rilis `dist/DraGon-win-x64.zip`.
-5. **Sistem Pembaruan Otomatis & Patch Inkremental ([`AppUpdateService`](file:///c:/Users/odan/Documents/DRAGON/DraGon.Core/Services/AppUpdateService.cs))**:
-   - Mendukung **Pembaruan Patch / Delta Kecil**: Jika hanya ada update minor atau perbaikan bug, aplikasi hanya mengunduh berkas yang mengalami perubahan (biasanya hanya ratusan KB), tanpa mengunduh ulang seluruh aplikasi maupun runtime (PHP, MariaDB, Nginx, Node.js).
-   - Tombol **"Periksa Pembaruan"** di menu Pengaturan dan Banner Peringatan otomatis jika versi rilis baru terdeteksi.
-   - Tombol simulasi **"Demo Update Kecil"** untuk menguji alur unduh patch dan penggantian berkas tanpa ketergantungan server publik.
-   - Skrip pembuat paket patch [`scripts/publish-patch.ps1`](file:///c:/Users/odan/Documents/DRAGON/scripts/publish-patch.ps1) yang otomatis menghasilkan berkas zip patch dan manifes `update-manifest.json` lengkap dengan hash SHA-256.
-
-6. **Sistem Net Installer Modular & Komponen On-Demand ([`InstallerEngine`](DraGon.Installer/InstallerEngine.cs))**:
-   - **Installer Awal Ramping Tanpa Runtime Bawaan:** File installer tidak lagi memuat file komponen berat di awal, sehingga ukuran download installer awal sangat kecil.
-   - **Pemilihan Komponen Interaktif di Wizard:** Pengguna bebas memilih komponen yang ingin diinstal (Apache 2.4, Nginx 1.26, PHP 8.3 LTS, PHP 8.4, MariaDB 11.4 LTS, PostgreSQL 17, Composer, Node.js 22 LTS, phpMyAdmin, Python 3.12) dengan tombol preset 1-klik (*Standar Apache*, *Stack Nginx*, *Pilih Semua*, atau *Hanya Inti DraGon*).
-   - **Estimasi Unduhan Real-Time:** Menghitung total MB perkiraan unduhan secara langsung saat checkbox dipilih atau diubah.
-   - **Unduhan Otomatis & Konfigurasi Cerdas:** Mengunduh arsip langsung dari repositori resmi masing-masing vendor, mengekstrak, menginisialisasi database, mengonfigurasi ekstensi `php.ini`, dan otomatis menyesuaikan web server utama serta mendaftarkan path ke Windows PATH.
-   - **Dukungan Build Online & Offline:** Script build mendukung pembuatan Net Installer (`-Mode Online`, default) maupun Offline Installer (`-Mode Offline`).
-
----
-
-## 3. Lokasi Konfigurasi, Sertifikat SSL, dan Log
-
-| Jenis Data | Lokasi Path Default |
-| :--- | :--- |
-| **Folder Data Utama** | `%LocalAppData%\DraGon` (`C:\Users\<User>\AppData\Local\DraGon`) |
-| **File Pengaturan** | `%LocalAppData%\DraGon\config\settings.json` |
-| **Daftar Proyek** | `%LocalAppData%\DraGon\config\projects.json` |
-| **Virtual Host Otomatis** | `%LocalAppData%\DraGon\config\generated\nginx` & `apache` |
-| **Sertifikat SSL Lokal (`.dra`)** | `%LocalAppData%\DraGon\certs\` (`DraGon-Local-RootCA.crt`, `<domain>.dra.crt`, `<domain>.dra.key`) |
-| **Log Aplikasi & Layanan** | `%LocalAppData%\DraGon\logs\dragon.log`, `service-*.log`, `project-*.log` |
-| **Cadangan File `hosts`** | `%LocalAppData%\DraGon\backups\hosts_yyyyMMdd_HHmmss_fff.bak` |
-| **Folder Runtime Default** | `%LocalAppData%\DraGon\runtimes\` (`nginx`, `php`, `mariadb`, `apache`, `nodejs`, `composer`) |
-
----
-
-## 4. Cara Menjalankan, Membangun Installer, & Memaketkan Rilis
+## 💻 Panduan Menjalankan & Membangun Proyek
 
 ```powershell
 # 1. Membangun seluruh solution
 dotnet build DraGon.slnx
 
-# 2. Menjalankan seluruh pengujian unit otomatis (53 pengujian)
+# 2. Menjalankan seluruh pengujian unit otomatis
 dotnet test DraGon.slnx
 
 # 3. Menjalankan aplikasi desktop DraGon
 dotnet run --project DraGon.App/DraGon.App.csproj
 
-# 4. Membangun Net Installer Mandiri GUI Ramping (dist/DraGon-Setup.exe & dist/DraGon-WebSetup.exe)
+# 4. Membangun Net Installer Mandiri GUI Ramping (dist/DraGon-Setup.exe)
 powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Online
 
 # (Opsional) Membangun Full Offline Installer Bundle
@@ -113,14 +105,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Off
 # 5. Membuat paket distribusi portabel ZIP (dist/DraGon-win-x64.zip)
 powershell -ExecutionPolicy Bypass -File .\scripts\publish-release.ps1
 
-# 6. Membangun paket patch inkremental delta (dist/patch/DraGon-Patch-v1.2.0.zip & manifest)
+# 6. Membangun paket patch inkremental delta
 powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.2.0" -Changelog "Pembaruan arsitektur Net Installer modular tanpa komponen bawaan dan pemilihan unduhan on-demand."
 ```
 
 ---
 
-## 5. Dokumentasi Rilis & Manifes Pembaruan
+## 📄 Dokumentasi Rilis
 
 Informasi lengkap mengenai rilis versi, catatan perubahan, dan aset distribusi dapat dibaca pada:
 - [`RELEASE.md`](RELEASE.md) — Panduan rilis resmi v1.2.0 dan rincian paket distribusi.
-- [`dist/patch/update-manifest.json`](dist/patch/update-manifest.json) — Format manifes pembaruan yang digunakan oleh layanan `AppUpdateService`.
+- [`dist/patch/update-manifest.json`](dist/patch/update-manifest.json) — Format manifes pembaruan aplikasi.

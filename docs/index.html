@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>DraGon — Lingkungan Development Lokal Windows Modern, Cepat &amp; Ringan (.dra)</title>
+  <meta name="description" content="DraGon: Lingkungan pengembangan web lokal modern untuk Windows 10 & 11. Apache HTTP, Nginx, Multi-Versi PHP 8.4/8.3 LTS/8.2, MariaDB 11.4 LTS, SSL Otomatis (.dra), Project Starter (Laravel, WordPress, Git Clone), dan Terminal terintegrasi." />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07070a;
+      --bg-card: #0f0f15;
+      --bg-card-hover: #151520;
+      --border: #20202d;
+      --border-accent: rgba(255, 107, 43, 0.45);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --dragon-orange: #ff6b2b;
+      --dragon-amber: #ff8f3d;
+      --dragon-glow: rgba(255, 107, 43, 0.22);
+      --btn-dragon-bg: linear-gradient(180deg, #ff8142 0%, #ff6b2b 60%, #e85310 100%);
+      --btn-metal-bg: linear-gradient(180deg, #ffffff 0%, #e2e8f0 45%, #cbd5e1 100%);
+      --btn-metal-text: #09090b;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+    }
+
+    body {
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(255, 107, 43, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 85% 20%, rgba(255, 143, 61, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 15% 45%, rgba(14, 165, 233, 0.05) 0%, transparent 40%);
+      background-repeat: no-repeat;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(7, 7, 10, 0.88);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      object-fit: cover;
+      box-shadow: 0 0 12px var(--dragon-glow);
+    }
+
+    .brand-tag {
+      font-size: 0.72rem;
+      background: rgba(255, 107, 43, 0.12);
+      border: 1px solid rgba(255, 107, 43, 0.35);
+      color: #ff9d66;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    /* Dragon Orange Metallic Button */
+    .btn-primary {
+      background: var(--btn-dragon-bg);
+      color: #ffffff;
+      box-shadow: 0 4px 18px var(--dragon-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #ff9459 0%, #ff7738 60%, #fa5e19 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 26px rgba(255, 107, 43, 0.4), inset 0 1px 0 #ffffff;
+      color: #ffffff;
+    }
+
+    /* Metal Silver Button */
+    .btn-metal {
+      background: var(--btn-metal-bg);
+      color: var(--btn-metal-text);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
+    }
+
+    .btn-metal:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(255, 255, 255, 0.22), inset 0 1px 0 #ffffff;
+      color: #000;
+    }
+
+    /* Dark Titanium Button */
+    .btn-secondary {
+      background: #12121a;
+      border: 1px solid #272738;
+      color: #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #181824;
+      border-color: #475569;
+      color: #fff;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 56px 0 36px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 107, 43, 0.35);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: clamp(0.74rem, 2.6vw, 0.84rem);
+      font-weight: 600;
+      color: #fed7aa;
+      margin-bottom: 22px;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-badge .dot {
+      flex-shrink: 0;
+      width: 7px;
+      height: 7px;
+      background: #ff6b2b;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ff6b2b;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1.14;
+      letter-spacing: -0.025em;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, #ffffff 25%, #fed7aa 65%, #ff9d66 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin: 0 auto 30px;
+      font-size: clamp(0.96rem, 2vw, 1.12rem);
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .hero-actions .btn {
+      padding: 13px 24px;
+      font-size: 0.98rem;
+    }
+
+    .hero-meta {
+      font-size: 0.84rem;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Showcase Image Preview */
+    .preview-section {
+      margin: 40px auto 0;
+      max-width: 900px;
+      background: #09090e;
+      border: 1px solid #1c1c28;
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 24px 56px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+
+    .screenshot-viewer {
+      width: 100%;
+      background: radial-gradient(circle at 50% 50%, #13131c 0%, #08080c 100%);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #222232;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .screenshot-viewer img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      cursor: zoom-in;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 12px;
+    }
+
+    .screenshot-viewer img:hover {
+      transform: scale(1.008);
+    }
+
+    /* Section Titles */
+    .section-title {
+      text-align: center;
+      margin: 70px 0 30px;
+    }
+
+    .section-title h2 {
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.015em;
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Feature Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-bottom: 56px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .feature-card h3 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #f1f5f9;
+    }
+
+    .feature-card p {
+      font-size: 0.89rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Comparison Table */
+    .comparison-section {
+      margin-bottom: 60px;
+    }
+
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #1a1a26;
+    }
+
+    th {
+      background: #14141e;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    th.highlight, td.highlight {
+      background: rgba(255, 107, 43, 0.08);
+      color: #ff9d66;
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* CTA Section */
+    .cta-card {
+      background: linear-gradient(135deg, rgba(255, 107, 43, 0.12) 0%, rgba(203, 213, 225, 0.02) 100%), #0c0c12;
+      border: 1px solid rgba(255, 107, 43, 0.35);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 44px 24px;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .cta-card h2 {
+      font-size: clamp(1.5rem, 3.6vw, 2.3rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .cta-card p {
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto 24px;
+      font-size: 0.98rem;
+    }
+
+    .smartscreen-tip {
+      margin-top: 24px;
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 14px;
+      max-width: 660px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 0.86rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .smartscreen-tip strong {
+      color: #f1f5f9;
+    }
+
+    .smartscreen-tip em {
+      color: #fed7aa;
+      font-style: normal;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .smartscreen-tip .tip-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 32px 0;
+      text-align: center;
+      font-size: 0.84rem;
+      color: var(--text-subtle);
+    }
+
+    footer a {
+      color: #cbd5e1;
+      margin: 0 8px;
+    }
+
+    footer a:hover {
+      color: #ff9d66;
+      text-decoration: underline;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.94);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: zoom-out;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 36px rgba(0, 0, 0, 0.9);
+      border: 1px solid #2a2a3e;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .nav-inner {
+        height: 56px;
+      }
+      .hero {
+        padding: 36px 0 24px;
+      }
+      .hero-actions .btn {
+        width: 100%;
+      }
+      .preview-section {
+        padding: 10px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .cta-card {
+        padding: 32px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <img src="assets/dragon-icon.png" alt="DraGon Logo" />
+        <span>DraGon</span>
+        <span id="nav-version" class="brand-tag">v1.2.0</span>
+      </a>
+      <div class="nav-links">
+        <a href="#fitur">Fitur Unggulan</a>
+        <a href="#perbandingan">Perbandingan</a>
+        <a href="#unduh">Unduh</a>
+        <a href="https://github.com/dningratx/dragon" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <a id="nav-download-btn" href="https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Setup.exe" class="btn btn-primary" style="padding: 8px 15px; font-size: 0.84rem;">
+        📥 Unduh DraGon
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        <span>Lingkungan Development Lokal Windows • .dra</span>
+      </div>
+
+      <h1>Lingkungan Development Web Lokal Modern, Cepat &amp; Ringan</h1>
+      
+      <p>
+        <strong>DraGon</strong> dirancang sebagai suksesor modern untuk Laragon dan XAMPP di Windows 10 &amp; 11. 
+        Mengintegrasikan Apache HTTP &amp; Nginx, Multi-Versi PHP (8.4, 8.3 LTS, 8.2), MariaDB 11.4 LTS, SSL otomatis <code>https://*.dra</code>, Project Starter instan (Laravel, WordPress, Git Clone), serta Terminal cerdas dalam satu antarmuka desktop yang elegan.
+      </p>
+
+      <div class="hero-actions">
+        <a id="main-download-btn" href="https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Setup.exe" class="btn btn-primary">
+          <span>🚀</span>
+          <span id="download-btn-label">Unduh Net Installer (DraGon-Setup.exe)</span>
+        </a>
+        <a id="portable-download-btn" href="https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-win-x64.zip" class="btn btn-metal">
+          <span>📦</span>
+          <span>Versi Portabel (ZIP)</span>
+        </a>
+        <a href="https://github.com/dningratx/dragon" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span>⭐</span>
+          <span>Bintang di GitHub</span>
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <span>🖥️ Windows 10 &amp; 11 (64-bit)</span>
+        <span>⚡ Native .NET 10 WPF</span>
+        <span>🔒 Zero-Config HTTPS / SSL</span>
+        <span>📦 Bebas Bloatware</span>
+      </div>
+
+      <!-- Showcase Screenshot -->
+      <div class="preview-section">
+        <div class="screenshot-viewer" onclick="openLightbox(document.getElementById('active-shot').src)">
+          <img id="active-shot" src="assets/showcase.jpg" alt="DraGon — Dashboard Lingkungan Development Lokal (.dra)" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Fitur Unggulan -->
+    <section id="fitur">
+      <div class="section-title">
+        <h2>Semua Kebutuhan Web Developer dalam 1 Aplikasi</h2>
+        <p>Dirancang dari awal untuk kecepatan, kestabilan, dan kemudahan alur kerja harian Anda.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🐘</div>
+          <h3>Multi-Versi PHP Berdampingan</h3>
+          <p>Beralih versi PHP aktif secara instan hanya dengan 1 klik. Mendukung PHP 8.4 terbaru, PHP 8.3 LTS (aktif), 8.2, dan 8.1 tanpa bentrok path sistem.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🐬</div>
+          <h3>MariaDB 11.4 LTS &amp; MySQL</h3>
+          <p>Server database SQL lokal yang cepat, aman, dan siap pakai. Dilengkapi tombol inisialisasi data otomatis (*Init Data*) dan pintasan ke phpMyAdmin serta HeidiSQL.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Web Server Ganda: Apache &amp; Nginx</h3>
+          <p>Bebas memilih web server utama antara Apache HTTP Server (dengan dukungan <code>mod_rewrite</code> &amp; <code>.htaccess</code>) atau Nginx berkinerja tinggi.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>SSL Lokal Otomatis (*.dra)</h3>
+          <p>Pemetaan otomatis folder <code>www</code> ke domain <code>https://&lt;nama&gt;.dra</code>. Sertifikat Root CA terpasang langsung ke Windows agar browser selalu aman (*Trusted SSL*).</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Pembuatan Proyek Super Cepat</h3>
+          <p>Ketik nama langsung jadi folder proyek. Mendukung starter kit resmi Laravel (Composer), unduh otomatis WordPress terbaru, maupun Git Clone langsung dari GUI.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💻</div>
+          <h3>Terminal Pintar Terintegrasi</h3>
+          <p>Buka PowerShell atau CMD di folder proyek mana pun dengan PATH runtime (PHP, Composer, Node.js, MariaDB, Git) yang sudah otomatis disuntikkan siap pakai.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎛️</div>
+          <h3>Pengaturan Ekstensi PHP Visual</h3>
+          <p>Aktifkan atau nonaktifkan modul PHP (curl, mbstring, pdo_mysql, gd, intl, openssl, xdebug, dll) langsung dengan toggle sakelar tanpa repot mengedit teks <code>php.ini</code> manual.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Ringan, Cepat &amp; Hemat Memori</h3>
+          <p>Dibangun secara native menggunakan WPF .NET 10 Windows. Bebas dari beban Electron yang boros RAM, terbuka seketika dan hemat baterai di laptop.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Perbandingan dengan Laragon / XAMPP -->
+    <section id="perbandingan" class="comparison-section">
+      <div class="section-title">
+        <h2>Mengapa Memilih DraGon?</h2>
+        <p>Lihat perbandingan langsung antara DraGon dengan tool tradisional lainnya.</p>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fitur &amp; Kemampuan</th>
+              <th class="highlight">🐉 DraGon (Modern)</th>
+              <th>Laragon</th>
+              <th>XAMPP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Arsitektur Aplikasi</strong></td>
+              <td class="highlight">Native .NET 10 WPF (Ultra-Cepat &amp; Modern)</td>
+              <td>Delphi Klasik</td>
+              <td>Perl / C++ Wrapper</td>
+            </tr>
+            <tr>
+              <td><strong>VirtualHost Otomatis</strong></td>
+              <td class="highlight">Ya, domain <code>https://*.dra</code> instan</td>
+              <td>Ya, domain <code>*.test</code></td>
+              <td>Manual via <code>httpd-vhosts.conf</code></td>
+            </tr>
+            <tr>
+              <td><strong>Sertifikat SSL / HTTPS Lokal</strong></td>
+              <td class="highlight">Otomatis Trusted Root CA (Hijau di Browser)</td>
+              <td>Perlu konfigurasi manual</td>
+              <td>Tidak otomatis (Self-Signed Error)</td>
+            </tr>
+            <tr>
+              <td><strong>Ganti Versi PHP &amp; DB</strong></td>
+              <td class="highlight">1-Klik Switcher + Auto Detect Runtimes</td>
+              <td>Dropdown klasik</td>
+              <td>Sangat rumit (Manual copy file)</td>
+            </tr>
+            <tr>
+              <td><strong>Web Server Support</strong></td>
+              <td class="highlight">Apache &amp; Nginx (Tersedia Berdampingan)</td>
+              <td>Apache / Nginx</td>
+              <td>Apache saja</td>
+            </tr>
+            <tr>
+              <td><strong>Project Starter Terintegrasi</strong></td>
+              <td class="highlight">Laravel, WordPress, Git Clone, PHP Standar</td>
+              <td>Quick App wizard</td>
+              <td>Tidak ada (Manual)</td>
+            </tr>
+            <tr>
+              <td><strong>Terminal Runtime Auto-Inject</strong></td>
+              <td class="highlight">PowerShell &amp; CMD langsung dengan PATH aktif</td>
+              <td>Cmder bawaan</td>
+              <td>Tombol Shell sederhana</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Download CTA Section -->
+    <section id="unduh" class="cta-card">
+      <h2>Siap Tingkatkan Produktivitas Coding Anda?</h2>
+      <p>Unduh DraGon sekarang secara gratis. Installer mandiri lengkap dengan runtime esensial atau paket portabel siap pakai tanpa instalasi.</p>
+      
+      <div class="hero-actions" style="margin-bottom: 0;">
+        <a id="bottom-download-btn" href="https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Setup.exe" class="btn btn-primary">
+          <span>🚀</span>
+          <span>Unduh Net Installer (DraGon-Setup.exe)</span>
+        </a>
+        <a href="https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-win-x64.zip" class="btn btn-metal">
+          <span>📦</span>
+          <span>Unduh DraGon-win-x64.zip</span>
+        </a>
+        <a href="https://github.com/dningratx/dragon/releases" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span>📄</span>
+          <span>Catatan Rilis (Changelog)</span>
+        </a>
+      </div>
+
+      <div class="smartscreen-tip">
+        <div class="tip-icon">🛡️</div>
+        <div class="tip-content">
+          <strong>Catatan Instalasi Windows (SmartScreen):</strong><br />
+          Jika muncul jendela <em>"Windows protected your PC"</em> saat pertama kali membuka installer, ini adalah perlindungan standar Windows untuk aplikasi rilis baru. Cukup klik <strong>"More info"</strong> lalu pilih <strong>"Run anyway"</strong> (Tetap jalankan).
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p><strong>DraGon</strong> — Lingkungan Development Lokal Windows Modern &amp; Cepat (.dra).</p>
+      <p style="margin-top: 8px;">
+        <a href="https://github.com/dningratx/dragon" target="_blank" rel="noopener">GitHub</a> •
+        <a href="https://github.com/dningratx/dragon/releases" target="_blank" rel="noopener">Rilis Resmi</a> •
+        <a href="https://github.com/dningratx/dragon/issues" target="_blank" rel="noopener">Lapor Masalah</a> •
+        <span>Freeware untuk Pengembang Web Windows</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Tangkapan Layar Diperbesar" />
+  </div>
+
+  <script>
+    function switchShot(src, btn) {
+      document.getElementById('active-shot').src = src;
+      document.querySelectorAll('.preview-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      lb.classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    // Sinkronkan versi & tautan unduh dari rilis GitHub terbaru
+    fetch('https://api.github.com/repos/dningratx/dragon/releases/latest')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !data.tag_name) return;
+        const ver = data.tag_name;
+        const versionEl = document.getElementById('nav-version');
+        if (versionEl) versionEl.textContent = ver;
+        
+        const exeAsset = (data.assets || []).find(a => a.name && a.name.endsWith('.exe'));
+        if (exeAsset && exeAsset.browser_download_url) {
+          const downloadUrl = exeAsset.browser_download_url;
+          ['main-download-btn', 'nav-download-btn', 'bottom-download-btn'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.href = downloadUrl;
+          });
+          const label = document.getElementById('download-btn-label');
+          if (label) label.textContent = `Unduh Installer Resmi (${ver})`;
+        }
+
+        const zipAsset = (data.assets || []).find(a => a.name && a.name.endsWith('.zip'));
+        if (zipAsset && zipAsset.browser_download_url) {
+          const zipBtn = document.getElementById('portable-download-btn');
+          if (zipBtn) zipBtn.href = zipAsset.browser_download_url;
+        }
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "version": "1.2.0",
+  "name": "DraGon v1.2.0",
+  "releaseDate": "2026-11-12",
+  "minWindowsVersion": "10.0.19041",
+  "architecture": "win-x64",
+  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-Setup.exe",
+  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.2.0/DraGon-win-x64.zip",
+  "changelog": [
+    "Arsitektur Net Installer Modular: Ukuran installer awal ramping tanpa file runtime bawaan",
+    "Layar pemilihan komponen interaktif di Setup Wizard dengan perkiraan download real-time",
+    "Unduhan on-demand resmi dari vendor untuk Apache, Nginx, PHP 8.3/8.4, MariaDB 11.4, PostgreSQL 17, Composer, Node.js 22, phpMyAdmin, dan Python 3.12",
+    "Otomatisasi inisialisasi php.ini, database, port, dan registrasi ke Windows PATH",
+    "Sistem pembaruan aplikasi otomatis dan patch inkremental (Delta Update)"
+  ]
+}
