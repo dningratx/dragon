@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DraGon Setup Wizard — Installer Lingkungan Development Lokal (.dra)"
         Icon="pack://application:,,,/Assets/dragon-icon.ico"
-        Width="750"
-        Height="710"
+        Width="780"
+        Height="760"
         MinHeight="620"
-        MinWidth="680"
+        MinWidth="700"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"
         Background="#0B0F17"
@@ -51,9 +51,9 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Dra" FontSize="22" FontWeight="ExtraBold" Foreground="#F8FAFC" />
                         <TextBlock Text="Gon" FontSize="22" FontWeight="ExtraBold" Foreground="#FF6B35" />
-                        <TextBlock Text=" Setup Wizard v1.0.0" FontSize="16" FontWeight="SemiBold" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                        <TextBlock Text=" Setup Wizard v1.2.0" FontSize="16" FontWeight="SemiBold" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="6,0,0,2" />
                     </StackPanel>
-                    <TextBlock Text="Installer Mandiri Siap Pakai (Apache 2.4, PHP 8.3, MariaDB 11.4, Composer, Node.js, phpMyAdmin)"
+                    <TextBlock Text="Installer Modular DraGon — Unduh &amp; pasang komponen sesuai kebutuhan proyek Anda"
                                FontSize="12"
                                Foreground="#94A3B8"
                                Margin="0,2,0,0" />
@@ -134,27 +134,294 @@
                                 Click="BrowseWorkspaceButton_OnClick" />
                     </Grid>
 
-                    <!-- Offline Bundle Info Banner -->
-                    <Border Background="#0F2922"
-                            BorderBrush="#10B981"
+                    <!-- Mode Info Banner (Net Installer vs Offline) -->
+                    <Border x:Name="SetupModeBannerBorder"
+                            Background="#0C2340"
+                            BorderBrush="#0284C7"
                             BorderThickness="1"
                             CornerRadius="7"
-                            Padding="12,8"
-                            Margin="0,0,0,12">
+                            Padding="12,10"
+                            Margin="0,0,0,14">
                         <StackPanel>
-                            <TextBlock Text="✓ Paket Mandiri Siap Pakai (100% Offline)"
-                                       FontSize="12"
-                                       Foreground="#10B981"
+                            <TextBlock x:Name="SetupModeTitleTextBlock"
+                                       Text="🌐 Mode Net Installer (Ukuran Ramping)"
+                                       FontSize="12.5"
+                                       Foreground="#38BDF8"
                                        FontWeight="Bold"
-                                       Margin="0,0,0,2" />
-                            <TextBlock Text="Paket runtime esensial (Apache 2.4, PHP 8.3 LTS, MariaDB 11.4, Composer, Node.js, phpMyAdmin) sudah terbundel di dalam installer ini. Paket atau versi lain (Nginx, PHP 8.4/8.2, MySQL, PostgreSQL) dapat diunduh kapan saja via tab 'Packages &amp; Installer'!"
+                                       Margin="0,0,0,3" />
+                            <TextBlock x:Name="SetupModeDescTextBlock"
+                                       Text="Installer awal tidak memuat file component sehingga ukuran installer sangat kecil. Komponen yang Anda centang di bawah akan otomatis diunduh langsung dari server resmi saat proses instalasi."
                                        FontSize="11.5"
                                        TextWrapping="Wrap"
-                                       Foreground="#A7F3D0" />
+                                       Foreground="#BAE6FD" />
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="3. Opsi Pintasan &amp; Lingkungan"
+                    <!-- 3. Pilihan Komponen Runtime & Server -->
+                    <Grid Margin="0,0,0,6">
+                        <TextBlock Text="3. Pilihan Komponen Runtime &amp; Server yang Diunduh"
+                                   FontSize="13.5"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+                        <TextBlock x:Name="EstimatedSizeTextBlock"
+                                   Text="Total estimasi unduhan: ~175 MB"
+                                   HorizontalAlignment="Right"
+                                   FontSize="11.5"
+                                   FontWeight="SemiBold"
+                                   Foreground="#10B981"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock Text="Pilih komponen yang ingin dipasang. Komponen yang belum ada akan otomatis diunduh dari server resmi:"
+                               FontSize="11.5"
+                               Foreground="#94A3B8"
+                               Margin="0,0,0,8" />
+
+                    <!-- Quick Preset Buttons -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button x:Name="PresetStandardButton"
+                                Content="Standar (Apache)"
+                                Background="#1E293B"
+                                Foreground="#F8FAFC"
+                                BorderBrush="#334155"
+                                FontSize="11"
+                                Padding="10,4"
+                                Cursor="Hand"
+                                Margin="0,0,6,0"
+                                Click="PresetStandardButton_OnClick" />
+                        <Button x:Name="PresetNginxButton"
+                                Content="Stack Nginx"
+                                Background="#1E293B"
+                                Foreground="#F8FAFC"
+                                BorderBrush="#334155"
+                                FontSize="11"
+                                Padding="10,4"
+                                Cursor="Hand"
+                                Margin="0,0,6,0"
+                                Click="PresetNginxButton_OnClick" />
+                        <Button x:Name="PresetAllButton"
+                                Content="Pilih Semua"
+                                Background="#1E293B"
+                                Foreground="#F8FAFC"
+                                BorderBrush="#334155"
+                                FontSize="11"
+                                Padding="10,4"
+                                Cursor="Hand"
+                                Margin="0,0,6,0"
+                                Click="PresetAllButton_OnClick" />
+                        <Button x:Name="PresetMinimalButton"
+                                Content="Hanya Inti DraGon"
+                                Background="#1E293B"
+                                Foreground="#94A3B8"
+                                BorderBrush="#334155"
+                                FontSize="11"
+                                Padding="10,4"
+                                Cursor="Hand"
+                                Click="PresetMinimalButton_OnClick" />
+                    </StackPanel>
+
+                    <!-- Category: Web Server -->
+                    <TextBlock Text="Web Server (HTTP &amp; HTTPS):"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="#38BDF8"
+                               Margin="0,2,0,5" />
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkApache" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Apache HTTP Server 2.4" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Web server standar dengan dukungan .htaccess, mod_rewrite, dan virtual hosts" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~15 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkNginx" Grid.Column="0" IsChecked="False" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Nginx Web Server 1.26" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Web server performa tinggi, reverse proxy ringan, hemat CPU dan memori" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~2 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Category: Bahasa Pemrograman & Tooling -->
+                    <TextBlock Text="Bahasa Pemrograman &amp; Package Manager:"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="#38BDF8"
+                               Margin="0,2,0,5" />
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkPhp83" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="PHP 8.3 LTS FastCGI" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Rilis stabil utama untuk Laravel, WordPress, CodeIgniter (ekstensi populer sudah aktif)" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~35 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkPhp84" Grid.Column="0" IsChecked="False" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="PHP 8.4 Terbaru FastCGI" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Rilis PHP termutakhir dengan fitur-fitur modern dan peningkatan performa" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~35 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkComposer" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Composer Dependency Manager" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Manajer paket resmi untuk dependensi PHP dan scaffolding proyek Laravel" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~4 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkNodeJs" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Node.js 22 LTS &amp; NPM" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Runtime JavaScript dan package manager untuk Vite, Tailwind CSS, React, dan Vue" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~35 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkPython" Grid.Column="0" IsChecked="False" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Python 3.12 Embeddable &amp; Pip" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Distribusi Python portabel untuk eksekusi skrip otomasi, AI/ML, dan backend" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~11 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Category: Database & GUI -->
+                    <TextBlock Text="Database &amp; Manajemen Data:"
+                               FontSize="11.5"
+                               FontWeight="SemiBold"
+                               Foreground="#38BDF8"
+                               Margin="0,2,0,5" />
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkMariaDb" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="MariaDB Server 11.4 LTS (MySQL Compatible)" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Server database SQL lokal cepat, otomatis inisialisasi folder data &amp; pengguna root" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~95 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkPhpMyAdmin" Grid.Column="0" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="phpMyAdmin Web GUI" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Dashboard manajemen database SQL berbasis web (akses via https://phpmyadmin.dra)" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~16 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Background="#0F172A" BorderBrush="#283548" BorderThickness="1" CornerRadius="6" Padding="10,7" Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="ChkPostgreSql" Grid.Column="0" IsChecked="False" VerticalAlignment="Center" Margin="0,0,10,0" Checked="OnComponentCheckedChanged" Unchecked="OnComponentCheckedChanged" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="PostgreSQL Server 17 (Enterprise DB)" FontSize="12.5" FontWeight="Bold" Foreground="#F8FAFC" />
+                                <TextBlock Text="Database relasional objek tingkat lanjut dengan dukungan psql &amp; pg_dump" FontSize="11" Foreground="#94A3B8" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Background="#1E293B" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="~315 MB" FontSize="11" Foreground="#38BDF8" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- 4. Opsi Pintasan & Lingkungan -->
+                    <TextBlock Text="4. Opsi Pintasan &amp; Lingkungan"
                                FontSize="13.5"
                                FontWeight="Bold"
                                Margin="0,0,0,6" />
@@ -173,12 +440,12 @@
                               Margin="0,0,0,6"
                               Content="Buat pintasan DraGon di Start Menu Windows" />
 
-                    <CheckBox x:Name="InitWorkspaceCheckBox"
+                    <CheckBox x:Name="AddToPathCheckBox"
                               IsChecked="True"
                               Foreground="#F8FAFC"
                               FontSize="12"
                               Margin="0,0,0,6"
-                              Content="Pasang seluruh paket runtime &amp; daftarkan path binary ke Windows PATH untuk Command Prompt" />
+                              Content="Daftarkan direktori komponen runtime ke Windows PATH (agar php, composer, node bisa diakses di CMD/PowerShell)" />
 
                     <CheckBox x:Name="LaunchAfterInstallCheckBox"
                               IsChecked="True"

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Microsoft.Win32;
 
 namespace DraGon.Installer;
@@ -29,11 +30,140 @@ public partial class SetupWindow : Window
 
         Loaded += (_, _) =>
         {
+            ApplyPackageModeBanner();
+            UpdateEstimatedSize();
+
             Topmost = true;
             Activate();
             Focus();
             Topmost = false;
         };
+    }
+
+    private void ApplyPackageModeBanner()
+    {
+        var hasOffline = InstallerEngine.HasEmbeddedRuntimes();
+        if (hasOffline)
+        {
+            SetupModeBannerBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F2922"));
+            SetupModeBannerBorder.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
+            SetupModeTitleTextBlock.Text = "✓ Mode Offline (Paket Terbundel Lengkap)";
+            SetupModeTitleTextBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981"));
+            SetupModeDescTextBlock.Text = "Paket runtime esensial sudah disertakan di dalam installer. Anda tetap dapat memilih komponen mana yang ingin dipasang.";
+            SetupModeDescTextBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#A7F3D0"));
+        }
+        else
+        {
+            SetupModeBannerBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0C2340"));
+            SetupModeBannerBorder.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0284C7"));
+            SetupModeTitleTextBlock.Text = "🌐 Mode Net Installer (Ukuran Ramping)";
+            SetupModeTitleTextBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#38BDF8"));
+            SetupModeDescTextBlock.Text = "Installer awal tidak memuat file component sehingga ukuran installer sangat kecil. Komponen yang Anda centang di bawah akan otomatis diunduh langsung dari server resmi saat proses instalasi.";
+            SetupModeDescTextBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD"));
+        }
+    }
+
+    private void OnComponentCheckedChanged(object sender, RoutedEventArgs e)
+    {
+        UpdateEstimatedSize();
+    }
+
+    private void UpdateEstimatedSize()
+    {
+        long totalMb = 0;
+        if (ChkApache?.IsChecked == true) totalMb += 15;
+        if (ChkNginx?.IsChecked == true) totalMb += 2;
+        if (ChkPhp83?.IsChecked == true) totalMb += 35;
+        if (ChkPhp84?.IsChecked == true) totalMb += 35;
+        if (ChkComposer?.IsChecked == true) totalMb += 4;
+        if (ChkNodeJs?.IsChecked == true) totalMb += 35;
+        if (ChkPython?.IsChecked == true) totalMb += 11;
+        if (ChkMariaDb?.IsChecked == true) totalMb += 95;
+        if (ChkPhpMyAdmin?.IsChecked == true) totalMb += 16;
+        if (ChkPostgreSql?.IsChecked == true) totalMb += 315;
+
+        if (EstimatedSizeTextBlock != null)
+        {
+            EstimatedSizeTextBlock.Text = totalMb > 0
+                ? $"Total estimasi unduhan: ~{totalMb} MB"
+                : "Hanya inti DraGon (Tanpa unduhan runtime)";
+        }
+    }
+
+    private void PresetStandardButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ChkApache.IsChecked = true;
+        ChkNginx.IsChecked = false;
+        ChkPhp83.IsChecked = true;
+        ChkPhp84.IsChecked = false;
+        ChkComposer.IsChecked = true;
+        ChkNodeJs.IsChecked = true;
+        ChkPython.IsChecked = false;
+        ChkMariaDb.IsChecked = true;
+        ChkPhpMyAdmin.IsChecked = true;
+        ChkPostgreSql.IsChecked = false;
+        UpdateEstimatedSize();
+    }
+
+    private void PresetNginxButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ChkApache.IsChecked = false;
+        ChkNginx.IsChecked = true;
+        ChkPhp83.IsChecked = true;
+        ChkPhp84.IsChecked = false;
+        ChkComposer.IsChecked = true;
+        ChkNodeJs.IsChecked = true;
+        ChkPython.IsChecked = false;
+        ChkMariaDb.IsChecked = true;
+        ChkPhpMyAdmin.IsChecked = true;
+        ChkPostgreSql.IsChecked = false;
+        UpdateEstimatedSize();
+    }
+
+    private void PresetAllButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ChkApache.IsChecked = true;
+        ChkNginx.IsChecked = true;
+        ChkPhp83.IsChecked = true;
+        ChkPhp84.IsChecked = true;
+        ChkComposer.IsChecked = true;
+        ChkNodeJs.IsChecked = true;
+        ChkPython.IsChecked = true;
+        ChkMariaDb.IsChecked = true;
+        ChkPhpMyAdmin.IsChecked = true;
+        ChkPostgreSql.IsChecked = true;
+        UpdateEstimatedSize();
+    }
+
+    private void PresetMinimalButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ChkApache.IsChecked = false;
+        ChkNginx.IsChecked = false;
+        ChkPhp83.IsChecked = false;
+        ChkPhp84.IsChecked = false;
+        ChkComposer.IsChecked = false;
+        ChkNodeJs.IsChecked = false;
+        ChkPython.IsChecked = false;
+        ChkMariaDb.IsChecked = false;
+        ChkPhpMyAdmin.IsChecked = false;
+        ChkPostgreSql.IsChecked = false;
+        UpdateEstimatedSize();
+    }
+
+    private List<string> GetSelectedComponents()
+    {
+        var list = new List<string>();
+        if (ChkApache?.IsChecked == true) list.Add("apache");
+        if (ChkNginx?.IsChecked == true) list.Add("nginx");
+        if (ChkPhp83?.IsChecked == true) list.Add("php83");
+        if (ChkPhp84?.IsChecked == true) list.Add("php84");
+        if (ChkComposer?.IsChecked == true) list.Add("composer");
+        if (ChkNodeJs?.IsChecked == true) list.Add("nodejs");
+        if (ChkPython?.IsChecked == true) list.Add("python");
+        if (ChkMariaDb?.IsChecked == true) list.Add("mariadb");
+        if (ChkPhpMyAdmin?.IsChecked == true) list.Add("phpmyadmin");
+        if (ChkPostgreSql?.IsChecked == true) list.Add("postgresql");
+        return list;
     }
 
     private void InstallPathTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -78,7 +208,6 @@ public partial class SetupWindow : Window
         if (dialog.ShowDialog() == true)
         {
             var selected = dialog.FolderName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            // If user selected drive root (e.g. C: or D:), append DraGon; otherwise use exact custom folder selected
             if (selected.Length <= 3 && selected.EndsWith(':'))
             {
                 InstallPathTextBox.Text = Path.Combine(selected + Path.DirectorySeparatorChar, "DraGon");
@@ -127,13 +256,17 @@ public partial class SetupWindow : Window
 
         SetControlsEnabled(false);
 
+        var selectedComponents = GetSelectedComponents();
+
         var options = new InstallOptions(
             TargetDirectory: targetDir,
             WorkspaceDirectory: workspaceDir,
             CreateDesktopShortcut: DesktopShortcutCheckBox.IsChecked == true,
             CreateStartMenuShortcut: StartMenuShortcutCheckBox.IsChecked == true,
-            InitializeWorkspaceAndDataDirs: InitWorkspaceCheckBox.IsChecked == true,
-            LaunchAfterInstall: LaunchAfterInstallCheckBox.IsChecked == true);
+            InitializeWorkspaceAndDataDirs: true,
+            LaunchAfterInstall: LaunchAfterInstallCheckBox.IsChecked == true,
+            SelectedComponents: selectedComponents,
+            AddToWindowsPath: AddToPathCheckBox.IsChecked == true);
 
         var progress = new Progress<(int Percent, string Status)>(report =>
         {
@@ -151,14 +284,19 @@ public partial class SetupWindow : Window
             return;
         }
 
+        var componentsSummary = selectedComponents.Count > 0
+            ? string.Join(", ", selectedComponents.Select(InstallerEngine.GetFriendlyComponentName))
+            : "Hanya Inti DraGon (Tanpa runtime bawaan)";
+
         MessageBox.Show(
             this,
             $"{message}\n\n" +
             $"• Folder Aplikasi Custom: {targetDir}\n" +
             $"• Folder Workspace Proyek: {workspaceDir}\n" +
+            $"• Komponen Terpasang: {componentsSummary}\n" +
             $"• Pintasan Desktop: {(options.CreateDesktopShortcut ? "Dibuat" : "Dilewati")}\n" +
             $"• Pintasan Start Menu: {(options.CreateStartMenuShortcut ? "Dibuat" : "Dilewati")}\n\n" +
-            "Seluruh runtime sudah siap! Saat aplikasi terbuka, Anda cukup klik tombol '▶ Start All'.",
+            "Seluruh konfigurasi siap! Saat aplikasi DraGon terbuka, Anda cukup klik tombol '▶ Start All'.",
             "Instalasi DraGon Selesai",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
@@ -219,7 +357,23 @@ public partial class SetupWindow : Window
         WorkspacePathTextBox.IsEnabled = enabled;
         DesktopShortcutCheckBox.IsEnabled = enabled;
         StartMenuShortcutCheckBox.IsEnabled = enabled;
-        InitWorkspaceCheckBox.IsEnabled = enabled;
+        AddToPathCheckBox.IsEnabled = enabled;
         LaunchAfterInstallCheckBox.IsEnabled = enabled;
+
+        PresetStandardButton.IsEnabled = enabled;
+        PresetNginxButton.IsEnabled = enabled;
+        PresetAllButton.IsEnabled = enabled;
+        PresetMinimalButton.IsEnabled = enabled;
+
+        ChkApache.IsEnabled = enabled;
+        ChkNginx.IsEnabled = enabled;
+        ChkPhp83.IsEnabled = enabled;
+        ChkPhp84.IsEnabled = enabled;
+        ChkComposer.IsEnabled = enabled;
+        ChkNodeJs.IsEnabled = enabled;
+        ChkPython.IsEnabled = enabled;
+        ChkMariaDb.IsEnabled = enabled;
+        ChkPhpMyAdmin.IsEnabled = enabled;
+        ChkPostgreSql.IsEnabled = enabled;
     }
 }

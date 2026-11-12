@@ -15,7 +15,9 @@ public sealed record InstallOptions(
     bool CreateDesktopShortcut,
     bool CreateStartMenuShortcut,
     bool InitializeWorkspaceAndDataDirs,
-    bool LaunchAfterInstall);
+    bool LaunchAfterInstall,
+    IReadOnlyList<string>? SelectedComponents = null,
+    bool AddToWindowsPath = true);
 
 [SupportedOSPlatform("windows")]
 public static class InstallerEngine
@@ -76,9 +78,14 @@ public static class InstallerEngine
 
             if (options.InitializeWorkspaceAndDataDirs)
             {
-                progress?.Report((68, "Menyiapkan seluruh paket runtime (Nginx, PHP, MariaDB, Apache, Composer, Node.js)..."));
-                var effectiveRuntimeDir = await ProvisionRuntimesAndSettingsAsync(targetDir, workspaceDir, progress);
-                progress?.Report((82, $"Runtime siap digunakan di: {effectiveRuntimeDir}"));
+                progress?.Report((35, "Menyiapkan komponen runtime dan server yang dipilih..."));
+                var effectiveRuntimeDir = await ProvisionRuntimesAndSettingsAsync(
+                    targetDir,
+                    workspaceDir,
+                    options.SelectedComponents,
+                    options.AddToWindowsPath,
+                    progress);
+                progress?.Report((85, $"Runtime siap digunakan di: {effectiveRuntimeDir}"));
             }
 
             if (options.CreateDesktopShortcut)
@@ -212,9 +219,85 @@ public static class InstallerEngine
         return File.Exists(adjacentZip) ? File.OpenRead(adjacentZip) : null;
     }
 
+    public static bool HasEmbeddedRuntimes()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using var resourceStream = assembly.GetManifestResourceStream("DraGonPayload.zip")
+                ?? OpenFallbackPayloadStream();
+
+            if (resourceStream is null) return false;
+
+            using var archive = new ZipArchive(resourceStream, ZipArchiveMode.Read);
+            return archive.Entries.Any(e =>
+                e.FullName.StartsWith("runtimes/", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrEmpty(e.Name));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static string GetFriendlyComponentName(string compId) => compId.ToLowerInvariant() switch
+    {
+        "apache" => "Apache HTTP Server 2.4",
+        "nginx" => "Nginx Web Server 1.26",
+        "php" or "php83" => "PHP 8.3 LTS FastCGI",
+        "php84" => "PHP 8.4 Terbaru FastCGI",
+        "mariadb" => "MariaDB Server 11.4 LTS",
+        "composer" => "Composer Dependency Manager",
+        "nodejs" => "Node.js 22 LTS & NPM",
+        "phpmyadmin" => "phpMyAdmin Web GUI",
+        "postgresql" => "PostgreSQL Server 17",
+        "python" => "Python 3.12 Portable",
+        _ => compId
+    };
+
+    public static string GetPrimaryFolderName(string compId) => compId.ToLowerInvariant() switch
+    {
+        "php83" or "php84" => "php",
+        _ => compId.ToLowerInvariant()
+    };
+
+    public static bool IsComponentInstalled(string compId, string baseDir)
+    {
+        if (string.IsNullOrWhiteSpace(baseDir) || !Directory.Exists(baseDir)) return false;
+
+        return compId.ToLowerInvariant() switch
+        {
+            "apache" => File.Exists(Path.Combine(baseDir, "apache", "bin", "httpd.exe")) ||
+                        File.Exists(Path.Combine(baseDir, "apache", "Apache24", "bin", "httpd.exe")),
+            "nginx" => File.Exists(Path.Combine(baseDir, "nginx", "nginx.exe")),
+            "php83" => Directory.Exists(Path.Combine(baseDir, "php")) &&
+                       (Directory.GetDirectories(Path.Combine(baseDir, "php")).Any(d => d.Contains("8.3", StringComparison.OrdinalIgnoreCase)) ||
+                        File.Exists(Path.Combine(baseDir, "php", "php.exe"))),
+            "php84" => Directory.Exists(Path.Combine(baseDir, "php")) &&
+                       Directory.GetDirectories(Path.Combine(baseDir, "php")).Any(d => d.Contains("8.4", StringComparison.OrdinalIgnoreCase)),
+            "php" => Directory.Exists(Path.Combine(baseDir, "php")) &&
+                     (File.Exists(Path.Combine(baseDir, "php", "php.exe")) ||
+                      Directory.EnumerateFiles(Path.Combine(baseDir, "php"), "php.exe", SearchOption.AllDirectories).Any()),
+            "mariadb" => Directory.Exists(Path.Combine(baseDir, "mariadb")) &&
+                         Directory.EnumerateFiles(Path.Combine(baseDir, "mariadb"), "mysqld.exe", SearchOption.AllDirectories).Any(),
+            "composer" => File.Exists(Path.Combine(baseDir, "composer", "composer.phar")) ||
+                          File.Exists(Path.Combine(baseDir, "composer", "composer.bat")),
+            "nodejs" => Directory.Exists(Path.Combine(baseDir, "nodejs")) &&
+                        Directory.EnumerateFiles(Path.Combine(baseDir, "nodejs"), "node.exe", SearchOption.AllDirectories).Any(),
+            "phpmyadmin" => File.Exists(Path.Combine(baseDir, "phpmyadmin", "index.php")),
+            "postgresql" => Directory.Exists(Path.Combine(baseDir, "postgresql")) &&
+                            Directory.EnumerateFiles(Path.Combine(baseDir, "postgresql"), "postgres.exe", SearchOption.AllDirectories).Any(),
+            "python" => Directory.Exists(Path.Combine(baseDir, "python")) &&
+                        Directory.EnumerateFiles(Path.Combine(baseDir, "python"), "python.exe", SearchOption.AllDirectories).Any(),
+            _ => false
+        };
+    }
+
     private static async Task<string> ProvisionRuntimesAndSettingsAsync(
         string targetDir,
         string workspaceDir,
+        IReadOnlyList<string>? selectedComponents,
+        bool addToWindowsPath,
         IProgress<(int Percent, string Status)>? progress)
     {
         var appDataRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DraGon");
@@ -231,7 +314,10 @@ public static class InstallerEngine
         Directory.CreateDirectory(targetCustomRuntimes);
         Directory.CreateDirectory(workspaceDir);
 
-        // Check if pre-downloaded runtimes exist in various candidate directories
+        var requestedComponents = selectedComponents != null
+            ? selectedComponents.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : new List<string> { "apache", "php83", "mariadb", "composer", "nodejs", "phpmyadmin" };
+
         var candidateSourceDirs = new List<string>
         {
             Path.Combine(AppContext.BaseDirectory, "runtimes"),
@@ -241,79 +327,94 @@ public static class InstallerEngine
             targetCustomRuntimes
         };
 
-        string? sourceRuntimes = null;
-        foreach (var candidate in candidateSourceDirs.Distinct(StringComparer.OrdinalIgnoreCase))
+        var logger = new DraGon.Core.Services.AppLogger();
+        var installer = new DraGon.Core.Services.RuntimeInstallerService(logger);
+        var catalog = new DraGon.Core.Services.RuntimePackageCatalogService().CreateCatalog();
+
+        if (requestedComponents.Count > 0)
         {
-            if (DraGon.Core.Services.DraGonPaths.HasInstalledRuntimes(candidate))
+            var totalComponents = requestedComponents.Count;
+            var slicePerComp = Math.Max(1, 50 / totalComponents);
+
+            for (var i = 0; i < totalComponents; i++)
             {
-                sourceRuntimes = candidate;
-                break;
-            }
-        }
+                var compId = requestedComponents[i];
+                var basePct = 35 + (i * slicePerComp);
+                var compTitle = GetFriendlyComponentName(compId);
 
-        var effectiveRuntimeDir = targetCustomRuntimes;
+                progress?.Report((basePct, $"[{i + 1}/{totalComponents}] Memeriksa ketersediaan komponen: {compTitle}..."));
 
-        if (sourceRuntimes is not null)
-        {
-            // Create directory junctions or copy lightweight configs into targetCustomRuntimes so custom app folder has full access
-            foreach (var pkgName in new[] { "apache", "nginx", "php", "mariadb", "mysql", "nodejs", "composer", "git", "postgresql", "phpmyadmin" })
-            {
-                var srcPkg = Path.Combine(sourceRuntimes, pkgName);
-                var dstPkg = Path.Combine(targetCustomRuntimes, pkgName);
-                var localPkg = Path.Combine(localAppDataRuntimes, pkgName);
-
-                if (!Directory.Exists(srcPkg))
+                // 1. Cek apakah sudah ada di target direktori
+                if (IsComponentInstalled(compId, targetCustomRuntimes))
                 {
-                    Directory.CreateDirectory(dstPkg);
+                    progress?.Report((basePct + slicePerComp, $"[{i + 1}/{totalComponents}] {compTitle} sudah terpasang."));
                     continue;
                 }
 
-                if (!string.Equals(Path.GetFullPath(srcPkg), Path.GetFullPath(dstPkg), StringComparison.OrdinalIgnoreCase))
+                // 2. Cek apakah ada di folder candidate lokal (misalnya offline bundle / cache PC)
+                var foundLocal = false;
+                foreach (var candidate in candidateSourceDirs.Distinct(StringComparer.OrdinalIgnoreCase))
                 {
-                    progress?.Report((74, $"Menyiapkan paket runtime {pkgName}..."));
-                    EnsureDirectoryLinkOrCopy(srcPkg, dstPkg);
+                    if (string.Equals(candidate, targetCustomRuntimes, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (IsComponentInstalled(compId, candidate))
+                    {
+                        var folderName = GetPrimaryFolderName(compId);
+                        var srcFolder = Path.Combine(candidate, folderName);
+                        var dstFolder = Path.Combine(targetCustomRuntimes, folderName);
+                        progress?.Report((basePct + (slicePerComp / 2), $"[{i + 1}/{totalComponents}] Menyiapkan {compTitle} dari paket lokal..."));
+                        EnsureDirectoryLinkOrCopy(srcFolder, dstFolder);
+                        foundLocal = true;
+                        break;
+                    }
                 }
 
-                if (!string.Equals(Path.GetFullPath(srcPkg), Path.GetFullPath(localPkg), StringComparison.OrdinalIgnoreCase) && !Directory.Exists(localPkg))
+                if (foundLocal && IsComponentInstalled(compId, targetCustomRuntimes))
                 {
-                    EnsureDirectoryLinkOrCopy(srcPkg, localPkg);
+                    continue;
                 }
-            }
 
-            effectiveRuntimeDir = DraGon.Core.Services.DraGonPaths.HasInstalledRuntimes(targetCustomRuntimes)
-                ? targetCustomRuntimes
-                : sourceRuntimes;
-        }
-        else
-        {
-            // Tidak ada runtime lokal di PC ini (misalnya fresh install di PC baru dari DraGon-Setup.exe standalone)
-            progress?.Report((69, "Runtime lokal belum ada di PC ini. Memeriksa koneksi & mengunduh runtime inti resmi..."));
-            await TryAutoDownloadCoreRuntimesAsync(targetCustomRuntimes, progress);
-
-            if (DraGon.Core.Services.DraGonPaths.HasInstalledRuntimes(targetCustomRuntimes))
-            {
-                effectiveRuntimeDir = targetCustomRuntimes;
+                // 3. Jika belum ada lokal (Net Installer mode), unduh langsung dari server resmi
+                progress?.Report((basePct, $"[{i + 1}/{totalComponents}] Mengunduh {compTitle} dari sumber resmi..."));
+                await DownloadAndInstallSelectedComponentAsync(
+                    compId,
+                    targetCustomRuntimes,
+                    installer,
+                    catalog,
+                    progress,
+                    basePct,
+                    slicePerComp);
             }
         }
+
+        var effectiveRuntimeDir = DraGon.Core.Services.DraGonPaths.HasInstalledRuntimes(targetCustomRuntimes)
+            ? targetCustomRuntimes
+            : localAppDataRuntimes;
 
         // Otomatis konfigurasi php.ini dan inisialisasi data MariaDB jika belum siap
-        progress?.Report((88, "Mengonfigurasi php.ini & data storage database..."));
+        progress?.Report((86, "Mengonfigurasi ekstensi php.ini & data storage database..."));
         EnsurePhpIniConfigured(effectiveRuntimeDir);
         EnsureDatabaseDataInitialized(effectiveRuntimeDir);
 
         // Mendaftarkan direktori runtime ke Windows User PATH untuk Command Prompt
-        progress?.Report((92, "Memeriksa dan mendaftarkan runtime ke Windows PATH untuk Command Prompt..."));
-        try
+        if (addToWindowsPath)
         {
-            var (changed, activePaths) = DraGon.Core.Services.EnvironmentPathService.SyncUserEnvironmentPath(effectiveRuntimeDir);
-            if (activePaths.Count > 0)
+            progress?.Report((90, "Mendaftarkan komponen runtime ke Windows PATH untuk Command Prompt..."));
+            try
             {
-                progress?.Report((94, $"PATH aktif ({activePaths.Count} paket terdaftar: PHP, Composer, MySQL, Node.js)."));
+                var (changed, activePaths) = DraGon.Core.Services.EnvironmentPathService.SyncUserEnvironmentPath(effectiveRuntimeDir);
+                if (activePaths.Count > 0)
+                {
+                    progress?.Report((92, $"PATH aktif ({activePaths.Count} paket terdaftar di CMD/PowerShell)."));
+                }
             }
-        }
-        catch
-        {
-            // Abaikan jika ada pembatasan environment
+            catch
+            {
+                // Abaikan jika ada pembatasan environment
+            }
         }
 
         // Create sample welcome project if workspace is empty
@@ -351,6 +452,20 @@ public static class InstallerEngine
                 new UTF8Encoding(false));
         }
 
+        // Tentukan web server preferensi berdasarkan pilihan user
+        var preferredWebServer = requestedComponents.Contains("nginx", StringComparer.OrdinalIgnoreCase) &&
+                                 !requestedComponents.Contains("apache", StringComparer.OrdinalIgnoreCase)
+            ? "Nginx"
+            : "Apache";
+
+        var selectedPhpId = requestedComponents.Contains("php84", StringComparer.OrdinalIgnoreCase)
+            ? "php-8.4"
+            : (requestedComponents.Contains("php83", StringComparer.OrdinalIgnoreCase) || requestedComponents.Contains("php", StringComparer.OrdinalIgnoreCase) ? "php-8.3" : "");
+
+        var selectedDbId = requestedComponents.Contains("mariadb", StringComparer.OrdinalIgnoreCase)
+            ? "mariadb-11.4"
+            : (requestedComponents.Contains("mysql", StringComparer.OrdinalIgnoreCase) ? "mysql-8.4" : "");
+
         // Save settings.json pointing to the custom application folder, custom workspace, and ready runtime folder
         var settingsPath = Path.Combine(configDir, "settings.json");
         var settingsObj = new
@@ -358,7 +473,7 @@ public static class InstallerEngine
             applicationFolderPath = targetDir,
             workspacePath = workspaceDir,
             runtimeBasePath = effectiveRuntimeDir,
-            preferredWebServer = "Apache",
+            preferredWebServer,
             webServerPort = 8080,
             webServerHttpsPort = 8443,
             apachePort = 80,
@@ -366,8 +481,8 @@ public static class InstallerEngine
             databasePort = 3306,
             phpCgiPort = 9000,
             enableLocalHttps = true,
-            selectedPhpVersionId = "",
-            selectedDatabaseVersionId = "",
+            selectedPhpVersionId = selectedPhpId,
+            selectedDatabaseVersionId = selectedDbId,
             preferredBrowser = "SystemDefault",
             customBrowserPath = "",
             runOnWindowsStartup = false,
@@ -380,61 +495,87 @@ public static class InstallerEngine
         return effectiveRuntimeDir;
     }
 
-    private static async Task TryAutoDownloadCoreRuntimesAsync(
+    private static async Task DownloadAndInstallSelectedComponentAsync(
+        string compId,
         string targetRuntimesDir,
-        IProgress<(int Percent, string Status)>? progress)
+        DraGon.Core.Services.RuntimeInstallerService installer,
+        IReadOnlyList<DraGon.Core.Models.RuntimePackageInfo> catalog,
+        IProgress<(int Percent, string Status)>? progress,
+        int basePct,
+        int pctSlice)
     {
         try
         {
-            var logger = new DraGon.Core.Services.AppLogger();
-            var installer = new DraGon.Core.Services.RuntimeInstallerService(logger);
-            var catalog = new DraGon.Core.Services.RuntimePackageCatalogService().CreateCatalog();
-
-            // 1. PHP (Default: PHP 8.3 LTS Populer Laravel)
-            var phpPresets = installer.GetPhpVersionPresets();
-            var phpTarget = phpPresets.FirstOrDefault(p => p.FolderName.Contains("8.3")) ?? phpPresets.FirstOrDefault();
-            if (phpTarget != null && !Directory.Exists(Path.Combine(targetRuntimesDir, "php")))
+            var compLower = compId.ToLowerInvariant();
+            switch (compLower)
             {
-                progress?.Report((70, $"Mengunduh paket resmi {phpTarget.DisplayName} dari windows.php.net..."));
-                var phpProgress = new Progress<(double Percent, string Status)>(p =>
-                    progress?.Report((70 + (int)(p.Percent * 0.05), p.Status)));
-                await installer.DownloadAndInstallVersionPresetAsync(phpTarget, targetRuntimesDir, phpProgress);
-            }
-
-            // 2. Apache HTTP Server (Official Win64)
-            var apachePkg = catalog.FirstOrDefault(c => c.Id == "apache");
-            if (apachePkg != null && !Directory.Exists(Path.Combine(targetRuntimesDir, "apache")))
-            {
-                progress?.Report((75, "Mengunduh paket resmi Apache HTTP Server dari apachelounge.com..."));
-                var apacheProgress = new Progress<(double Percent, string Status)>(p =>
-                    progress?.Report((75 + (int)(p.Percent * 0.05), p.Status)));
-                await installer.DownloadAndInstallOfficialArchiveAsync(apachePkg, targetRuntimesDir, apacheProgress);
-            }
-
-            // 3. MariaDB Database Server (LTS 11.4)
-            var dbPresets = installer.GetDatabaseVersionPresets();
-            var dbTarget = dbPresets.FirstOrDefault(p => p.FolderName.Contains("mariadb-11.4")) ?? dbPresets.FirstOrDefault();
-            if (dbTarget != null && !Directory.Exists(Path.Combine(targetRuntimesDir, "mariadb")))
-            {
-                progress?.Report((80, $"Mengunduh paket resmi {dbTarget.DisplayName} dari mariadb.org..."));
-                var dbProgress = new Progress<(double Percent, string Status)>(p =>
-                    progress?.Report((80 + (int)(p.Percent * 0.05), p.Status)));
-                await installer.DownloadAndInstallVersionPresetAsync(dbTarget, targetRuntimesDir, dbProgress);
-            }
-
-            // 4. Composer PHP Dependency Manager
-            var composerPkg = catalog.FirstOrDefault(c => c.Id == "composer");
-            if (composerPkg != null && !Directory.Exists(Path.Combine(targetRuntimesDir, "composer")))
-            {
-                progress?.Report((85, "Mengunduh Composer dependency manager dari getcomposer.org..."));
-                var compProgress = new Progress<(double Percent, string Status)>(p =>
-                    progress?.Report((85 + (int)(p.Percent * 0.02), p.Status)));
-                await installer.DownloadAndInstallOfficialArchiveAsync(composerPkg, targetRuntimesDir, compProgress);
+                case "php":
+                case "php83":
+                {
+                    var phpPresets = installer.GetPhpVersionPresets();
+                    var preset = phpPresets.FirstOrDefault(p => p.FolderName.Contains("8.3")) ?? phpPresets.FirstOrDefault();
+                    if (preset != null)
+                    {
+                        var subProgress = new Progress<(double Percent, string Status)>(p =>
+                        {
+                            var currentPct = basePct + (int)(p.Percent / 100.0 * pctSlice);
+                            progress?.Report((currentPct, $"[{preset.DisplayName}] {p.Status}"));
+                        });
+                        await installer.DownloadAndInstallVersionPresetAsync(preset, targetRuntimesDir, subProgress);
+                    }
+                    break;
+                }
+                case "php84":
+                {
+                    var phpPresets = installer.GetPhpVersionPresets();
+                    var preset = phpPresets.FirstOrDefault(p => p.FolderName.Contains("8.4")) ?? phpPresets.FirstOrDefault();
+                    if (preset != null)
+                    {
+                        var subProgress = new Progress<(double Percent, string Status)>(p =>
+                        {
+                            var currentPct = basePct + (int)(p.Percent / 100.0 * pctSlice);
+                            progress?.Report((currentPct, $"[{preset.DisplayName}] {p.Status}"));
+                        });
+                        await installer.DownloadAndInstallVersionPresetAsync(preset, targetRuntimesDir, subProgress);
+                    }
+                    break;
+                }
+                case "mariadb":
+                {
+                    var dbPresets = installer.GetDatabaseVersionPresets();
+                    var preset = dbPresets.FirstOrDefault(p => p.FolderName.Contains("mariadb-11.4"))
+                        ?? dbPresets.FirstOrDefault(p => p.FolderName.Contains("mariadb"))
+                        ?? dbPresets.FirstOrDefault();
+                    if (preset != null)
+                    {
+                        var subProgress = new Progress<(double Percent, string Status)>(p =>
+                        {
+                            var currentPct = basePct + (int)(p.Percent / 100.0 * pctSlice);
+                            progress?.Report((currentPct, $"[{preset.DisplayName}] {p.Status}"));
+                        });
+                        await installer.DownloadAndInstallVersionPresetAsync(preset, targetRuntimesDir, subProgress);
+                    }
+                    break;
+                }
+                default:
+                {
+                    var pkg = catalog.FirstOrDefault(c => string.Equals(c.Id, compLower, StringComparison.OrdinalIgnoreCase));
+                    if (pkg != null)
+                    {
+                        var subProgress = new Progress<(double Percent, string Status)>(p =>
+                        {
+                            var currentPct = basePct + (int)(p.Percent / 100.0 * pctSlice);
+                            progress?.Report((currentPct, $"[{pkg.Name}] {p.Status}"));
+                        });
+                        await installer.DownloadAndInstallOfficialArchiveAsync(pkg, targetRuntimesDir, subProgress);
+                    }
+                    break;
+                }
             }
         }
         catch (Exception ex)
         {
-            progress?.Report((87, $"Pengunduhan online otomatis dilewati ({ex.Message}). Anda dapat mengunduh atau mengimpor paket kapan saja via tab 'Packages & Installer'."));
+            progress?.Report((basePct + pctSlice, $"Peringatan: Gagal mengunduh {compId} ({ex.Message}). Anda dapat memasangnya nanti melalui DraGon."));
         }
     }
 

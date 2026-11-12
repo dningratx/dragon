@@ -68,6 +68,13 @@ DRAGON/
    - Tombol simulasi **"Demo Update Kecil"** untuk menguji alur unduh patch dan penggantian berkas tanpa ketergantungan server publik.
    - Skrip pembuat paket patch [`scripts/publish-patch.ps1`](file:///c:/Users/odan/Documents/DRAGON/scripts/publish-patch.ps1) yang otomatis menghasilkan berkas zip patch dan manifes `update-manifest.json` lengkap dengan hash SHA-256.
 
+6. **Sistem Net Installer Modular & Komponen On-Demand ([`InstallerEngine`](DraGon.Installer/InstallerEngine.cs))**:
+   - **Installer Awal Ramping Tanpa Runtime Bawaan:** File installer tidak lagi memuat file komponen berat di awal, sehingga ukuran download installer awal sangat kecil.
+   - **Pemilihan Komponen Interaktif di Wizard:** Pengguna bebas memilih komponen yang ingin diinstal (Apache 2.4, Nginx 1.26, PHP 8.3 LTS, PHP 8.4, MariaDB 11.4 LTS, PostgreSQL 17, Composer, Node.js 22 LTS, phpMyAdmin, Python 3.12) dengan tombol preset 1-klik (*Standar Apache*, *Stack Nginx*, *Pilih Semua*, atau *Hanya Inti DraGon*).
+   - **Estimasi Unduhan Real-Time:** Menghitung total MB perkiraan unduhan secara langsung saat checkbox dipilih atau diubah.
+   - **Unduhan Otomatis & Konfigurasi Cerdas:** Mengunduh arsip langsung dari repositori resmi masing-masing vendor, mengekstrak, menginisialisasi database, mengonfigurasi ekstensi `php.ini`, dan otomatis menyesuaikan web server utama serta mendaftarkan path ke Windows PATH.
+   - **Dukungan Build Online & Offline:** Script build mendukung pembuatan Net Installer (`-Mode Online`, default) maupun Offline Installer (`-Mode Offline`).
+
 ---
 
 ## 3. Lokasi Konfigurasi, Sertifikat SSL, dan Log
@@ -97,14 +104,17 @@ dotnet test DraGon.slnx
 # 3. Menjalankan aplikasi desktop DraGon
 dotnet run --project DraGon.App/DraGon.App.csproj
 
-# 4. Membangun Wizard Installer Mandiri GUI (dist/DraGon-Setup.exe)
-powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1
+# 4. Membangun Net Installer Mandiri GUI Ramping (dist/DraGon-Setup.exe & dist/DraGon-WebSetup.exe)
+powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Online
+
+# (Opsional) Membangun Full Offline Installer Bundle
+powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Offline
 
 # 5. Membuat paket distribusi portabel ZIP (dist/DraGon-win-x64.zip)
 powershell -ExecutionPolicy Bypass -File .\scripts\publish-release.ps1
 
-# 6. Membangun paket patch inkremental delta (dist/patch/DraGon-Patch-v1.1.0.zip & manifest)
-powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.1.0" -Changelog "Pembaruan tombol update dan sistem patch inkremental."
+# 6. Membangun paket patch inkremental delta (dist/patch/DraGon-Patch-v1.2.0.zip & manifest)
+powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.2.0" -Changelog "Pembaruan arsitektur Net Installer modular tanpa komponen bawaan dan pemilihan unduhan on-demand."
 ```
 
 ---
@@ -112,5 +122,5 @@ powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1
 ## 5. Dokumentasi Rilis & Manifes Pembaruan
 
 Informasi lengkap mengenai rilis versi, catatan perubahan, dan aset distribusi dapat dibaca pada:
-- [`RELEASE.md`](RELEASE.md) — Panduan rilis resmi v1.1.0 dan rincian paket distribusi.
+- [`RELEASE.md`](RELEASE.md) — Panduan rilis resmi v1.2.0 dan rincian paket distribusi.
 - [`dist/patch/update-manifest.json`](dist/patch/update-manifest.json) — Format manifes pembaruan yang digunakan oleh layanan `AppUpdateService`.

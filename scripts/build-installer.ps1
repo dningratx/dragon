@@ -1,6 +1,7 @@
 param(
     [string]$Configuration = "Release",
-    [string]$Runtime = "win-x64"
+    [string]$Runtime = "win-x64",
+    [ValidateSet("Online", "Offline")][string]$Mode = "Online"
 )
 
 $ErrorActionPreference = "Stop"
@@ -61,80 +62,86 @@ Copy-Item (Join-Path $RepoRoot "README.md") -Destination (Join-Path $StagingDir 
 Remove-Item $ElevatorStaging -Recurse -Force
 Remove-Item $AppStaging -Recurse -Force
 
-Write-Host "=== 3. Menyertakan Paket Runtime Esensial (Ramping & Optimal) ===" -ForegroundColor Yellow
+Write-Host "=== 3. Pengaturan Paket Runtime (Mode: $Mode) ===" -ForegroundColor Yellow
 $LocalRuntimes = Join-Path $env:LOCALAPPDATA "DraGon\runtimes"
 $StagingRuntimes = Join-Path $StagingDir "runtimes"
 
-if (Test-Path $LocalRuntimes) {
-    New-Item -ItemType Directory -Path $StagingRuntimes -Force | Out-Null
+if ($Mode -eq "Offline") {
+    Write-Host "-> Mode Offline aktif: Menyertakan paket runtime lokal ke dalam payload installer..." -ForegroundColor Cyan
+    if (Test-Path $LocalRuntimes) {
+        New-Item -ItemType Directory -Path $StagingRuntimes -Force | Out-Null
 
-    # 1. Apache HTTP Server (Web Server Utama)
-    $srcApache = Join-Path $LocalRuntimes "apache"
-    if (Test-Path $srcApache) {
-        Write-Host "  -> Menyertakan Apache HTTP Server..." -ForegroundColor Cyan
-        Copy-Item $srcApache -Destination (Join-Path $StagingRuntimes "apache") -Recurse -Force
-    }
-
-    # 2. PHP Runtime (Satu versi utama: PHP 8.3 LTS)
-    $srcPhp = Join-Path $LocalRuntimes "php"
-    if (Test-Path $srcPhp) {
-        Write-Host "  -> Menyertakan PHP 8.3 (Satu versi utama stabil)..." -ForegroundColor Cyan
-        $dstPhp = Join-Path $StagingRuntimes "php"
-        New-Item -ItemType Directory -Path $dstPhp -Force | Out-Null
-        $phpCandidate = Join-Path $srcPhp "php-8.3.36"
-        if (-not (Test-Path $phpCandidate)) {
-            $phpCandidate = (Get-ChildItem $srcPhp -Directory | Select-Object -First 1).FullName
+        # 1. Apache HTTP Server (Web Server Utama)
+        $srcApache = Join-Path $LocalRuntimes "apache"
+        if (Test-Path $srcApache) {
+            Write-Host "  -> Menyertakan Apache HTTP Server..." -ForegroundColor Cyan
+            Copy-Item $srcApache -Destination (Join-Path $StagingRuntimes "apache") -Recurse -Force
         }
-        if ($phpCandidate -and (Test-Path $phpCandidate)) {
-            Copy-Item $phpCandidate -Destination (Join-Path $dstPhp (Split-Path -Leaf $phpCandidate)) -Recurse -Force
-        }
-    }
 
-    # 3. MariaDB Database Server (Dibersihkan dari data lokal & debug pdb)
-    $srcMaria = Join-Path $LocalRuntimes "mariadb"
-    if (Test-Path $srcMaria) {
-        Write-Host "  -> Menyertakan MariaDB Database Server (bersih)..." -ForegroundColor Cyan
-        $dstMaria = Join-Path $StagingRuntimes "mariadb"
-        New-Item -ItemType Directory -Path $dstMaria -Force | Out-Null
-        $mariaCandidate = (Get-ChildItem $srcMaria -Directory | Select-Object -First 1).FullName
-        if ($mariaCandidate -and (Test-Path $mariaCandidate)) {
-            $mariaTarget = Join-Path $dstMaria (Split-Path -Leaf $mariaCandidate)
-            New-Item -ItemType Directory -Path $mariaTarget -Force | Out-Null
-            Get-ChildItem $mariaCandidate | Where-Object { $_.Name -ne "data" } | ForEach-Object {
-                Copy-Item $_.FullName -Destination $mariaTarget -Recurse -Force
+        # 2. PHP Runtime (Satu versi utama: PHP 8.3 LTS)
+        $srcPhp = Join-Path $LocalRuntimes "php"
+        if (Test-Path $srcPhp) {
+            Write-Host "  -> Menyertakan PHP 8.3 (Satu versi utama stabil)..." -ForegroundColor Cyan
+            $dstPhp = Join-Path $StagingRuntimes "php"
+            New-Item -ItemType Directory -Path $dstPhp -Force | Out-Null
+            $phpCandidate = Join-Path $srcPhp "php-8.3.36"
+            if (-not (Test-Path $phpCandidate)) {
+                $phpCandidate = (Get-ChildItem $srcPhp -Directory | Select-Object -First 1).FullName
             }
-            Get-ChildItem $mariaTarget -Recurse -Filter "*.pdb" -ErrorAction SilentlyContinue | Remove-Item -Force
+            if ($phpCandidate -and (Test-Path $phpCandidate)) {
+                Copy-Item $phpCandidate -Destination (Join-Path $dstPhp (Split-Path -Leaf $phpCandidate)) -Recurse -Force
+            }
+        }
+
+        # 3. MariaDB Database Server (Dibersihkan dari data lokal & debug pdb)
+        $srcMaria = Join-Path $LocalRuntimes "mariadb"
+        if (Test-Path $srcMaria) {
+            Write-Host "  -> Menyertakan MariaDB Database Server (bersih)..." -ForegroundColor Cyan
+            $dstMaria = Join-Path $StagingRuntimes "mariadb"
+            New-Item -ItemType Directory -Path $dstMaria -Force | Out-Null
+            $mariaCandidate = (Get-ChildItem $srcMaria -Directory | Select-Object -First 1).FullName
+            if ($mariaCandidate -and (Test-Path $mariaCandidate)) {
+                $mariaTarget = Join-Path $dstMaria (Split-Path -Leaf $mariaCandidate)
+                New-Item -ItemType Directory -Path $mariaTarget -Force | Out-Null
+                Get-ChildItem $mariaCandidate | Where-Object { $_.Name -ne "data" } | ForEach-Object {
+                    Copy-Item $_.FullName -Destination $mariaTarget -Recurse -Force
+                }
+                Get-ChildItem $mariaTarget -Recurse -Filter "*.pdb" -ErrorAction SilentlyContinue | Remove-Item -Force
+            }
+        }
+
+        # 4. Composer Dependency Manager
+        $srcComp = Join-Path $LocalRuntimes "composer"
+        if (Test-Path $srcComp) {
+            Write-Host "  -> Menyertakan Composer..." -ForegroundColor Cyan
+            Copy-Item $srcComp -Destination (Join-Path $StagingRuntimes "composer") -Recurse -Force
+        }
+
+        # 5. Node.js Runtime
+        $srcNode = Join-Path $LocalRuntimes "nodejs"
+        if (Test-Path $srcNode) {
+            Write-Host "  -> Menyertakan Node.js & npm..." -ForegroundColor Cyan
+            Copy-Item $srcNode -Destination (Join-Path $StagingRuntimes "nodejs") -Recurse -Force
+        }
+
+        # 6. phpMyAdmin Web GUI
+        $srcPma = Join-Path $LocalRuntimes "phpmyadmin"
+        if (Test-Path $srcPma) {
+            Write-Host "  -> Menyertakan phpMyAdmin..." -ForegroundColor Cyan
+            Copy-Item $srcPma -Destination (Join-Path $StagingRuntimes "phpmyadmin") -Recurse -Force
+        }
+
+        # 7. Nginx Web Server
+        $srcNginx = Join-Path $LocalRuntimes "nginx"
+        if (-not (Test-Path $srcNginx)) { $srcNginx = "C:\DraGon\runtimes\nginx" }
+        if (Test-Path $srcNginx) {
+            Write-Host "  -> Menyertakan Nginx Web Server..." -ForegroundColor Cyan
+            Copy-Item $srcNginx -Destination (Join-Path $StagingRuntimes "nginx") -Recurse -Force
         }
     }
-
-    # 4. Composer Dependency Manager
-    $srcComp = Join-Path $LocalRuntimes "composer"
-    if (Test-Path $srcComp) {
-        Write-Host "  -> Menyertakan Composer..." -ForegroundColor Cyan
-        Copy-Item $srcComp -Destination (Join-Path $StagingRuntimes "composer") -Recurse -Force
-    }
-
-    # 5. Node.js Runtime
-    $srcNode = Join-Path $LocalRuntimes "nodejs"
-    if (Test-Path $srcNode) {
-        Write-Host "  -> Menyertakan Node.js & npm..." -ForegroundColor Cyan
-        Copy-Item $srcNode -Destination (Join-Path $StagingRuntimes "nodejs") -Recurse -Force
-    }
-
-    # 6. phpMyAdmin Web GUI
-    $srcPma = Join-Path $LocalRuntimes "phpmyadmin"
-    if (Test-Path $srcPma) {
-        Write-Host "  -> Menyertakan phpMyAdmin..." -ForegroundColor Cyan
-        Copy-Item $srcPma -Destination (Join-Path $StagingRuntimes "phpmyadmin") -Recurse -Force
-    }
-
-    # 7. Nginx Web Server
-    $srcNginx = Join-Path $LocalRuntimes "nginx"
-    if (-not (Test-Path $srcNginx)) { $srcNginx = "C:\DraGon\runtimes\nginx" }
-    if (Test-Path $srcNginx) {
-        Write-Host "  -> Menyertakan Nginx Web Server..." -ForegroundColor Cyan
-        Copy-Item $srcNginx -Destination (Join-Path $StagingRuntimes "nginx") -Recurse -Force
-    }
+} else {
+    Write-Host "-> Mode Net Installer (Online): Payload dibuat ramping tanpa file component bawaan." -ForegroundColor Cyan
+    Write-Host "   Pengguna dapat memilih komponen langsung pada wizard installer untuk diunduh secara on-demand." -ForegroundColor Cyan
 }
 
 Write-Host "=== 4. Mengemas Payload Instalasi Ramping (DraGonPayload.zip) ===" -ForegroundColor Yellow
@@ -153,6 +160,12 @@ dotnet publish (Join-Path $RepoRoot "DraGon.Installer\DraGon.Installer.csproj") 
 
 $FinalSetupExe = Join-Path $DistRoot "DraGon-Setup.exe"
 Copy-Item (Join-Path $InstallerOutDir "DraGon-Setup.exe") -Destination $FinalSetupExe -Force
+
+if ($Mode -eq "Online") {
+    $WebSetupExe = Join-Path $DistRoot "DraGon-WebSetup.exe"
+    Copy-Item $FinalSetupExe -Destination $WebSetupExe -Force
+    Write-Host "Net Installer juga disalin ke: $WebSetupExe" -ForegroundColor Cyan
+}
 
 Remove-Item $StagingDir -Recurse -Force
 
