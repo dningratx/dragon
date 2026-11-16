@@ -3036,57 +3036,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
         IsUpdateAvailable = false;
     }
 
-    [RelayCommand]
-    private async Task SimulateSamplePatchUpdateAsync()
-    {
-        IsCheckingForUpdates = true;
-        UpdateStatusSummary = "Mensimulasikan pemeriksaan update kecil (patch)...";
-        await Task.Delay(400);
-
-        var samplePatchZip = Path.Combine(DraGonPaths.UpdatesDirectory, "DraGon-Patch-v1.0.1-Demo.zip");
-        AppUpdateService.CreateSamplePatchPackage(samplePatchZip, new Dictionary<string, string>
-        {
-            ["patch-notes.txt"] = "DraGon v1.0.1 Patch Applied Successfully!\nUpdated at: " + DateTime.Now,
-            ["version.txt"] = "1.0.1"
-        });
-
-        AvailableUpdateManifest = new AppUpdateManifest
-        {
-            Version = "1.0.1",
-            MinimumSupportedVersion = "1.0.0",
-            ReleaseDate = DateTime.Now,
-            Title = "DraGon v1.0.1 (Patch Kecil / Delta Update)",
-            Changelog = "• Perbaikan performa query database lokal & port detection\n• Optimalisasi pemindaian proyek Laravel & Node.js dev runner\n• Pembaharuan sertifikat SSL internal DraGon\n• Ukuran unduhan hanya 350 KB (Hanya berkas yang berubah)",
-            UpdateType = UpdatePackageType.Patch,
-            PatchPackageUrl = samplePatchZip,
-            PatchSizeBytes = 358400, // 350 KB
-            FullPackageUrl = "https://github.com/example/dragon/releases/download/v1.0.1/DraGon-Setup.exe",
-            FullSizeBytes = 89128960, // 85 MB
-            ChangedFiles =
-            [
-                "DraGon.Core.dll (~150 KB)",
-                "DraGon.App.dll (~180 KB)",
-                "config/templates/nginx.conf (~20 KB)"
-            ]
-        };
-
-        UpdateChangedFiles.Clear();
-        foreach (var f in AvailableUpdateManifest.ChangedFiles)
-        {
-            UpdateChangedFiles.Add(f);
-        }
-
-        IsUpdateAvailable = true;
-        IsPatchUpdateAvailable = true;
-        IsCheckingForUpdates = false;
-        UpdateStatusSummary = "Simulasi: Pembaruan kecil (Patch 350 KB) siap dipasang!";
-
-        ShowNotification(
-            "Pembaruan Patch Tersedia (Simulasi)",
-            "Ditemukan patch pembaruan kecil v1.0.1 (hanya ~350 KB, bukan seluruh aplikasi). Anda dapat mencoba menekan tombol '⚡ Pasang Update Kecil (Patch)'!",
-            NotificationTone.Info);
-    }
-
     public void Dispose()
     {
         _projectTunnelManager.Dispose();

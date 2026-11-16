@@ -2024,13 +2024,7 @@
                                                 ToolTip="Periksa versi rilis terbaru ke server"
                                                 Command="{Binding CheckForUpdateCommand}"
                                                 IsEnabled="{Binding IsCheckingForUpdates, Converter={StaticResource BoolInverter}}"
-                                                Padding="10,5"
-                                                Margin="0,0,6,0" />
-                                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                                Content="🧪 Demo Update Kecil"
-                                                ToolTip="Uji coba simulasi update patch tanpa perlu server internet"
-                                                Command="{Binding SimulateSamplePatchUpdateCommand}"
-                                                Padding="8,5" />
+                                                Padding="10,5" />
                                     </StackPanel>
                                 </Grid>
 

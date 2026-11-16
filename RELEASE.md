@@ -1,16 +1,17 @@
-# DraGon v1.3.1 — Perbaikan Auto-Updater Patch & Public Tunnel (`cloudflared`)
+# DraGon v1.3.2 — UI Pembaruan Bersih, Perbaikan Auto-Updater, & Public Tunnel (`cloudflared`)
 
 > **Tanggal Rilis:** 16 November 2026  
-> **Versi:** `v1.3.1`  
+> **Versi:** `v1.3.2`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.3.1
+## 🌟 Sorotan Pembaruan v1.3.2
 
-### Perbaikan Bug
-- **Perbaikan Auto-Updater Patch (`apply-patch.ps1`):** Memperbaiki kegagalan penimpaan `DraGon.App.exe` saat update otomatis ketika proses aplikasi masih dalam tahap penutupan layanan lokal. Kini updater menunggu proses keluar sepenuhnya (hingga 30 detik), mengekstrak ke folder staging, melakukan retry penyalinan file hingga 20 kali, menargetkan direktori `.exe` aktif (`Environment.ProcessPath`), serta mencatat log ke `updates/apply-patch.log`.
+### Penyempurnaan UI & Perbaikan Bug
+- **Pembersihan Menu Pembaruan:** Menghilangkan tombol `Demo Update Kecil` dari halaman Pengaturan agar antarmuka pembaruan aplikasi lebih bersih dan fokus pada rilis produksi.
+- **Perbaikan Auto-Updater Patch (`apply-patch.ps1`):** Memastikan penimpaan `DraGon.App.exe` menunggu proses keluar sepenuhnya (hingga 30 detik), mengekstrak ke staging, melakukan retry penyalinan file terkunci, serta menargetkan direktori `.exe` aktif (`Environment.ProcessPath`).
 
 ### Fitur Baru (v1.3.x): Public Tunnel / Share 1-Klik (Cloudflare Tunnel)
 - **Bagikan Situs `.dra` ke Internet Sementara:** Klik tombol **`🌐 Share`** di kartu proyek untuk mengekspos virtual host `.dra` lokal ke URL publik `https://*.trycloudflare.com` tanpa perlu akun Cloudflare.
@@ -62,7 +63,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.3.1.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.3.0/v1.2.x/v1.1.0/v1.0.0). |
+| **`DraGon-Patch-v1.3.2.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.3.x/v1.2.x/v1.1.0/v1.0.0). |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---
