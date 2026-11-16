@@ -55,11 +55,12 @@ $releaseId = $release.id
 Write-Host "Release berhasil dibuat / ditemukan (ID: $releaseId)!" -ForegroundColor Green
 Write-Host "URL: $($release.html_url)" -ForegroundColor Cyan
 
-# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-v1.2.1.zip)
+# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-v1.2.1.zip, update-manifest.json)
 $filesToUpload = @(
     (Join-Path $DistRoot "DraGon-Setup.exe"),
     (Join-Path $DistRoot "DraGon-win-x64.zip"),
-    (Join-Path $DistRoot "patch\DraGon-Patch-v1.2.1.zip")
+    (Join-Path $DistRoot "patch\DraGon-Patch-v1.2.1.zip"),
+    (Join-Path $DistRoot "patch\update-manifest.json")
 )
 
 Add-Type -AssemblyName System.Net.Http

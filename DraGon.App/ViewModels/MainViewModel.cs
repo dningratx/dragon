@@ -2752,6 +2752,21 @@ public partial class MainViewModel : ObservableObject, IDisposable
                     $"Versi baru {result.Manifest.Version} siap dipasang ({badge}). Buka tab Pengaturan untuk melihat rincian dan memasang pembaruan.",
                     NotificationTone.Info);
             }
+            else if (result.Manifest is null)
+            {
+                IsUpdateAvailable = false;
+                AvailableUpdateManifest = null;
+                UpdateChangedFiles.Clear();
+                UpdateStatusSummary = result.Message;
+
+                if (isManual)
+                {
+                    ShowNotification(
+                        "Gagal Memeriksa Pembaruan",
+                        result.Message,
+                        NotificationTone.Warning);
+                }
+            }
             else
             {
                 IsUpdateAvailable = false;

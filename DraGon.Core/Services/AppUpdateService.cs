@@ -100,6 +100,13 @@ public sealed class AppUpdateService
                 };
             }
 
+            if (Uri.TryCreate(resolvedSource, UriKind.Absolute, out var manifestUri) &&
+                (manifestUri.Scheme == Uri.UriSchemeHttp || manifestUri.Scheme == Uri.UriSchemeHttps))
+            {
+                manifest.PatchPackageUrl = ResolveRelativeAssetUrl(manifestUri, manifest.PatchPackageUrl);
+                manifest.FullPackageUrl = ResolveRelativeAssetUrl(manifestUri, manifest.FullPackageUrl);
+            }
+
             var hasUpdate = IsNewerVersion(currentVersionStr, manifest.Version);
             var isPatchAvailable = false;
 
@@ -417,6 +424,26 @@ public sealed class AppUpdateService
         return Convert.ToHexStringLower(hash);
     }
 
+    private static string ResolveRelativeAssetUrl(Uri manifestUri, string? assetUrl)
+    {
+        if (string.IsNullOrWhiteSpace(assetUrl))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = assetUrl.Trim();
+        if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+            Path.IsPathRooted(trimmed))
+        {
+            return trimmed;
+        }
+
+        return Uri.TryCreate(manifestUri, trimmed, out var resolvedUri)
+            ? resolvedUri.AbsoluteUri
+            : trimmed;
+    }
+
     private string? ResolveUpdateSource(string? customSource)
     {
         if (!string.IsNullOrWhiteSpace(customSource))
@@ -437,6 +464,6 @@ public sealed class AppUpdateService
         }
 
         // Default remote manifest GitHub release endpoint
-        return "https://raw.githubusercontent.com/username/dragon/main/releases/update-manifest.json";
+        return "https://github.com/dningratx/dragon/releases/latest/download/update-manifest.json";
     }
 }
