@@ -51,7 +51,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Dra" FontSize="22" FontWeight="ExtraBold" Foreground="#F8FAFC" />
                         <TextBlock Text="Gon" FontSize="22" FontWeight="ExtraBold" Foreground="#FF6B35" />
-                        <TextBlock Text=" Setup Wizard v1.2.0" FontSize="16" FontWeight="SemiBold" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="6,0,0,2" />
+                        <TextBlock Text=" Setup Wizard v1.2.1" FontSize="16" FontWeight="SemiBold" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="6,0,0,2" />
                     </StackPanel>
                     <TextBlock Text="Installer Modular DraGon — Unduh &amp; pasang komponen sesuai kebutuhan proyek Anda"
                                FontSize="12"

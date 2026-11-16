@@ -1,13 +1,18 @@
-# DraGon v1.2.0 — Rilis Net Installer Modular & Unduhan Komponen On-Demand
+# DraGon v1.2.1 — Perbaikan Sinkronisasi Portal Localhost & Rilis Net Installer Modular
 
-> **Tanggal Rilis:** 12 November 2026  
-> **Versi:** `v1.2.0`  
+> **Tanggal Rilis:** 16 November 2026  
+> **Versi:** `v1.2.1`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.2.0
+## 🌟 Sorotan Pembaruan v1.2.1
+
+### Perbaikan Bug
+- **Sinkronisasi Portal `localhost` (`index.php` Root Workspace):** Memperbaiki bug di mana daftar proyek lokal (`.dra`) hanya muncul pada `localhost/welcome/` tetapi tidak ikut diperbarui pada halaman root `localhost` (`index.php`). Kini `ServerConfigGenerator` memperbarui `index.php` portal bawaan DraGon secara otomatis setiap kali proyek ditambah atau diperbarui, sambil tetap melindungi file `index.php` kustom milik pengguna.
+
+### Sorotan Fitur v1.2.x (Net Installer Modular)
 
 ### 1. Arsitektur Net Installer (Web Installer) Ramping
 - **Tanpa Komponen Bawaan Berat di Awal:** File installer kini dibuat ramping tanpa membundel ratusan MB berkas runtime lokal di dalam payload.
@@ -48,7 +53,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.2.0.zip`** | **Delta / Patch** | Paket pembaruan kecil (~300 KB) untuk pengguna versi 1.1.0/1.0.0. |
+| **`DraGon-Patch-v1.2.1.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.2.0/v1.1.0/v1.0.0). |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---

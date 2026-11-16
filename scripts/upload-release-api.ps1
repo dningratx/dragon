@@ -3,7 +3,7 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot
 $DistRoot = Join-Path $RepoRoot "dist"
 $NotesPath = Join-Path $RepoRoot "RELEASE.md"
 
-Write-Host "=== Mempublikasikan GitHub Release v1.2.0 via GitHub API ===" -ForegroundColor Cyan
+Write-Host "=== Mempublikasikan GitHub Release v1.2.1 via GitHub API ===" -ForegroundColor Cyan
 
 # 1. Dapatkan token dningratx dari Git Credential Manager
 $lines = @('protocol=https', 'host=github.com', 'username=dningratx') | git credential fill
@@ -28,19 +28,19 @@ $headers = @{
 $bodyContent = if (Test-Path $NotesPath) {
     [System.IO.File]::ReadAllText($NotesPath, [System.Text.Encoding]::UTF8)
 } else {
-    "Rilis DraGon v1.2.0 dengan Net Installer modular dan unduhan komponen on-demand."
+    "Rilis DraGon v1.2.1 dengan Net Installer modular dan unduhan komponen on-demand."
 }
 
 $releasePayload = @{
-    tag_name = "v1.2.0"
+    tag_name = "v1.2.1"
     target_commitish = "main"
-    name = "DraGon v1.2.0 — Net Installer Modular & Unduhan Komponen On-Demand"
+    name = "DraGon v1.2.1 — Net Installer Modular & Unduhan Komponen On-Demand"
     body = $bodyContent
     draft = $false
     prerelease = $false
 } | ConvertTo-Json -Depth 5
 
-Write-Host "1. Membuat GitHub Release v1.2.0..." -ForegroundColor Yellow
+Write-Host "1. Membuat GitHub Release v1.2.1..." -ForegroundColor Yellow
 $createUrl = "https://api.github.com/repos/dningratx/dragon/releases"
 
 try {
@@ -48,18 +48,18 @@ try {
 } catch {
     # Jika release sudah ada, ambil datanya
     Write-Host "Release mungkin sudah ada, mencoba mengambil data rilis..." -ForegroundColor Yellow
-    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/dningratx/dragon/releases/tags/v1.2.0" -Method Get -Headers $headers
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/dningratx/dragon/releases/tags/v1.2.1" -Method Get -Headers $headers
 }
 
 $releaseId = $release.id
 Write-Host "Release berhasil dibuat / ditemukan (ID: $releaseId)!" -ForegroundColor Green
 Write-Host "URL: $($release.html_url)" -ForegroundColor Cyan
 
-# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-v1.2.0.zip)
+# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-v1.2.1.zip)
 $filesToUpload = @(
     (Join-Path $DistRoot "DraGon-Setup.exe"),
     (Join-Path $DistRoot "DraGon-win-x64.zip"),
-    (Join-Path $DistRoot "patch\DraGon-Patch-v1.2.0.zip")
+    (Join-Path $DistRoot "patch\DraGon-Patch-v1.2.1.zip")
 )
 
 Add-Type -AssemblyName System.Net.Http
@@ -115,5 +115,5 @@ foreach ($filePath in $filesToUpload) {
 }
 
 $httpClient.Dispose()
-Write-Host "=== Selesai! Release v1.2.0 telah sepenuhnya dipublikasikan ===" -ForegroundColor Green
+Write-Host "=== Selesai! Release v1.2.1 telah sepenuhnya dipublikasikan ===" -ForegroundColor Green
 Write-Host "Kunjungi: $($release.html_url)" -ForegroundColor Cyan

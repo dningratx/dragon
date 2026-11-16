@@ -1,6 +1,6 @@
 ﻿param(
-    [string]$Tag = "v1.2.0",
-    [string]$Title = "DraGon v1.2.0 — Net Installer Modular & Unduhan Komponen On-Demand",
+    [string]$Tag = "v1.2.1",
+    [string]$Title = "DraGon v1.2.1 — Perbaikan Sinkronisasi Portal Localhost & Net Installer Modular",
     [string]$NotesFile = "RELEASE.md"
 )
 

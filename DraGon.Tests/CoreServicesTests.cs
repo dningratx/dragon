@@ -620,4 +620,78 @@ public sealed class CoreServicesTests
         Assert.False(string.IsNullOrWhiteSpace(path));
         Assert.True(File.Exists(path) || path == "powershell.exe");
     }
+
+    [Fact]
+    public void ServerConfigGenerator_UpdatesRootPortalIndexWhenManaged_AndPreservesCustomIndex()
+    {
+        var tempWorkspace = Path.Combine(Path.GetTempPath(), "DraGonPortalTest_" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(tempWorkspace);
+            var logger = new AppLogger();
+            var ssl = new LocalSslService(logger);
+            var generator = new ServerConfigGenerator(logger, ssl);
+
+            var settings = new AppSettings
+            {
+                WorkspacePath = tempWorkspace,
+                EnableLocalHttps = false,
+                HostnameSuffix = ".dra"
+            };
+
+            // 1. Initial generation with 0 projects
+            generator.GenerateConfigs(settings, []);
+
+            var rootIndex = Path.Combine(tempWorkspace, "index.php");
+            var welcomeIndex = Path.Combine(tempWorkspace, "welcome", "index.php");
+            Assert.True(File.Exists(rootIndex));
+            Assert.True(File.Exists(welcomeIndex));
+            Assert.DoesNotContain("officerts.dra", File.ReadAllText(rootIndex));
+
+            // 2. Regenerate after adding projects: both root index.php and welcome/index.php must include projects
+            var projectDir = Path.Combine(tempWorkspace, "officerts");
+            Directory.CreateDirectory(projectDir);
+            var projects = new[]
+            {
+                new ProjectItem { Name = "officerts", Domain = "officerts.dra", FolderPath = projectDir }
+            };
+
+            generator.GenerateConfigs(settings, projects);
+
+            var updatedRoot = File.ReadAllText(rootIndex);
+            var updatedWelcome = File.ReadAllText(welcomeIndex);
+            Assert.Contains("officerts (officerts.dra)", updatedRoot);
+            Assert.Contains("officerts (officerts.dra)", updatedWelcome);
+
+            // 3. Legacy DraGon portal without marker comment should also be upgraded/updated
+            File.WriteAllText(rootIndex, """
+                <?php
+                header('Content-Type: text/html; charset=utf-8');
+                ?>
+                <!DOCTYPE html>
+                <html lang="id">
+                <head><title>DraGon Local Development Environment (.dra)</title></head>
+                <body><p>Lingkungan development lokal DraGon sudah berjalan dan siap melayani proyek PHP, Laravel, serta database MySQL/MariaDB Anda.</p></body>
+                </html>
+                """);
+
+            generator.GenerateConfigs(settings, projects);
+            Assert.Contains("officerts (officerts.dra)", File.ReadAllText(rootIndex));
+
+            // 4. Custom user index.php in workspace root must not be overwritten
+            const string customContent = "<?php echo 'custom user page';";
+            File.WriteAllText(rootIndex, customContent);
+
+            generator.GenerateConfigs(settings, projects);
+            Assert.Equal(customContent, File.ReadAllText(rootIndex));
+            Assert.Contains("officerts (officerts.dra)", File.ReadAllText(welcomeIndex));
+        }
+        finally
+        {
+            if (Directory.Exists(tempWorkspace))
+            {
+                Directory.Delete(tempWorkspace, recursive: true);
+            }
+        }
+    }
 }
