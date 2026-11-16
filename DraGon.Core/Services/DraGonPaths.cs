@@ -145,6 +145,7 @@ public static class DraGonPaths
             Directory.CreateDirectory(Path.Combine(runtimeDir, "phpmyadmin"));
             Directory.CreateDirectory(Path.Combine(runtimeDir, "nodejs"));
             Directory.CreateDirectory(Path.Combine(runtimeDir, "composer"));
+            Directory.CreateDirectory(Path.Combine(runtimeDir, "cloudflared"));
         }
         catch
         {

@@ -28,6 +28,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private readonly ServerConfigGenerator _vhostGenerator;
     private readonly ServiceProcessManager _serviceManager;
     private readonly ProjectDevProcessManager _projectDevProcessManager;
+    private readonly ProjectTunnelManager _projectTunnelManager;
     private readonly RuntimePackageCatalogService _packageCatalogService;
     private readonly RuntimeInstallerService _runtimeInstallerService;
     private readonly ExternalLauncherService _launcherService;
@@ -313,6 +314,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _vhostGenerator = new ServerConfigGenerator(_logger, _sslService);
         _serviceManager = new ServiceProcessManager(_logger, _vhostGenerator, _phpVersionManager);
         _projectDevProcessManager = new ProjectDevProcessManager(_logger, _phpVersionManager);
+        _projectTunnelManager = new ProjectTunnelManager(_logger);
         _packageCatalogService = new RuntimePackageCatalogService();
         _runtimeInstallerService = new RuntimeInstallerService(_logger);
         _launcherService = new ExternalLauncherService(_logger);
@@ -333,6 +335,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         _serviceManager.SetUiDispatcher(uiDispatcher);
         _projectDevProcessManager.SetUiDispatcher(uiDispatcher);
+        _projectTunnelManager.SetUiDispatcher(uiDispatcher);
 
         _logger.EntryWritten += entry =>
         {
@@ -1130,6 +1133,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             SetBusyState(true, "Menghentikan seluruh layanan yang sedang berjalan...");
             var summary = await _serviceManager.StopAllAsync();
             await _projectDevProcessManager.StopAllProjectDevTasksAsync();
+            await _projectTunnelManager.StopAllTunnelsAsync();
             _serviceManager.RefreshServiceStates(_activeSettings);
             UpdateDashboardSummary();
             ShowNotification("Layanan Dihentikan", summary, NotificationTone.Info);
@@ -2052,6 +2056,147 @@ public partial class MainViewModel : ObservableObject, IDisposable
         ShowNotification("Proses Dev Proyek Dihentikan", msg, ok ? NotificationTone.Info : NotificationTone.Warning);
     }
 
+    [RelayCommand]
+    private async Task ToggleProjectTunnelAsync(ProjectItem? project)
+    {
+        if (project is null)
+        {
+            return;
+        }
+
+        if (project.IsTunnelRunning || project.IsTunnelStarting)
+        {
+            var (stopOk, stopMsg) = await _projectTunnelManager.StopTunnelAsync(project);
+            ShowNotification("Public Tunnel Dihentikan", stopMsg, stopOk ? NotificationTone.Info : NotificationTone.Warning);
+            return;
+        }
+
+        var cloudflaredExe = ProjectTunnelManager.ResolveCloudflaredExecutable(_activeSettings.RuntimeBasePath);
+        if (string.IsNullOrWhiteSpace(cloudflaredExe))
+        {
+            var confirm = MessageBox.Show(
+                "Fitur Share 1-Klik menggunakan Cloudflare Tunnel (cloudflared.exe, ~35 MB) yang belum terpasang.\n\nApakah Anda ingin DraGon mengunduh dan memasangnya otomatis sekarang?",
+                "Pasang Cloudflare Tunnel (cloudflared)",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var cloudflaredPkg = RuntimePackages.FirstOrDefault(p => p.Id == "cloudflared")
+                ?? _packageCatalogService.CreateCatalog().FirstOrDefault(p => p.Id == "cloudflared");
+
+            if (cloudflaredPkg is null)
+            {
+                ShowNotification("Paket Tidak Ditemukan", "Definisi paket cloudflared tidak ditemukan di katalog.", NotificationTone.Error);
+                return;
+            }
+
+            try
+            {
+                SetBusyState(true, "Mengunduh Cloudflare Tunnel (cloudflared.exe)...");
+                var progress = new Progress<(double Percent, string Status)>(report =>
+                {
+                    BusyMessage = $"Mengunduh cloudflared: {report.Status}";
+                });
+
+                var (installOk, installMsg) = await _runtimeInstallerService.DownloadAndInstallOfficialArchiveAsync(
+                    cloudflaredPkg,
+                    _activeSettings.RuntimeBasePath,
+                    progress);
+
+                _packageCatalogService.RefreshCatalogStatus(RuntimePackages, _activeSettings.RuntimeBasePath);
+
+                if (!installOk)
+                {
+                    ShowNotification("Gagal Memasang cloudflared", installMsg, NotificationTone.Error);
+                    return;
+                }
+            }
+            finally
+            {
+                SetBusyState(false);
+            }
+        }
+
+        var primaryWebKind = _activeSettings.PreferredWebServer == WebServerType.Apache
+            ? ServiceKind.Apache
+            : ServiceKind.Nginx;
+
+        var webService = Services.FirstOrDefault(s => s.Kind == primaryWebKind);
+        if (webService is not null && !webService.IsRunning)
+        {
+            await _serviceManager.StartServiceAsync(primaryWebKind, _activeSettings, Projects);
+            if (project.FrameworkType != ProjectFramework.NodeApp)
+            {
+                await _serviceManager.StartServiceAsync(ServiceKind.PhpCgi, _activeSettings, Projects);
+            }
+
+            _serviceManager.RefreshServiceStates(_activeSettings);
+            UpdateDashboardSummary();
+        }
+
+        var (ok, msg, publicUrl) = await _projectTunnelManager.StartTunnelAsync(project, _activeSettings);
+        if (ok && !string.IsNullOrWhiteSpace(publicUrl))
+        {
+            try
+            {
+                Clipboard.SetText(publicUrl);
+                ShowNotification("Public Tunnel Aktif (URL Disalin)", $"{publicUrl} siap diakses publik dan sudah disalin ke clipboard.", NotificationTone.Success);
+            }
+            catch
+            {
+                ShowNotification("Public Tunnel Aktif", $"{publicUrl} siap diakses publik.", NotificationTone.Success);
+            }
+        }
+        else
+        {
+            ShowNotification("Gagal Memulai Public Tunnel", msg, NotificationTone.Warning);
+        }
+    }
+
+    [RelayCommand]
+    private void CopyTunnelUrl(ProjectItem? project)
+    {
+        if (project is null || string.IsNullOrWhiteSpace(project.PublicTunnelUrl))
+        {
+            return;
+        }
+
+        try
+        {
+            Clipboard.SetText(project.PublicTunnelUrl);
+            ShowNotification("URL Tunnel Disalin", project.PublicTunnelUrl, NotificationTone.Success);
+        }
+        catch (Exception ex)
+        {
+            ShowNotification("Gagal Menyalin URL", ex.Message, NotificationTone.Warning);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenTunnelUrl(ProjectItem? project)
+    {
+        if (project is null || string.IsNullOrWhiteSpace(project.PublicTunnelUrl))
+        {
+            return;
+        }
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(project.PublicTunnelUrl)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            ShowNotification("Gagal Membuka Browser", ex.Message, NotificationTone.Warning);
+        }
+    }
+
     // Interactive Terminal Shortcuts
     [RelayCommand]
     private void RunArtisanServe(ProjectItem? project)
@@ -2528,6 +2673,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         await _serviceManager.StopAllAsync();
         await _projectDevProcessManager.StopAllProjectDevTasksAsync();
+        await _projectTunnelManager.StopAllTunnelsAsync();
     }
 
     private void LoadProjectsFromDisk()
@@ -2935,6 +3081,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        _projectTunnelManager.Dispose();
         _projectDevProcessManager.Dispose();
         _serviceManager.Dispose();
     }

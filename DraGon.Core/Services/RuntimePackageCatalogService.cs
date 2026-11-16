@@ -173,6 +173,21 @@ public sealed class RuntimePackageCatalogService
                 ExecutableFileName = "heidisql.exe",
                 InstallInstructions =
                     "Aplikasi desktop GUI populer untuk mengelola MariaDB, MySQL, PostgreSQL, SQLite, dan MS SQL dengan cepat (seperti pada Laragon)."
+            },
+            new RuntimePackageInfo
+            {
+                Id = "cloudflared",
+                Name = "Cloudflare Tunnel (cloudflared)",
+                Category = "Public Tunnel & Share",
+                RecommendedVersion = "Latest (x64)",
+                License = "Apache License 2.0",
+                OfficialWebsiteUrl = "https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/",
+                OfficialDownloadUrl = "https://github.com/cloudflare/cloudflared/releases/latest",
+                DirectArchiveDownloadUrl = "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe",
+                ExpectedRelativeDir = "cloudflared",
+                ExecutableFileName = "cloudflared.exe",
+                InstallInstructions =
+                    "Biner tunggal resmi Cloudflare Tunnel untuk membagikan domain .dra lokal ke internet (https://*.trycloudflare.com) dalam 1 klik tanpa akun."
             }
         };
 
@@ -439,6 +454,17 @@ public sealed class RuntimePackageCatalogService
                         VersionNumber = "12.6",
                         DownloadUrl = "https://www.heidisql.com/downloads/releases/HeidiSQL_12.6_64_Portable.zip",
                         TargetSubFolder = "heidisql-12.6"
+                    });
+                    break;
+
+                case "cloudflared":
+                    pkg.AvailableVersions.Add(new PackageVersionOption
+                    {
+                        DisplayName = "Latest Stable (Windows x64 - Rekomendasi)",
+                        VersionNumber = "latest",
+                        DownloadUrl = "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe",
+                        TargetSubFolder = string.Empty,
+                        IsRecommended = true
                     });
                     break;
             }

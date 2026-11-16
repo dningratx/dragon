@@ -106,6 +106,31 @@ public partial class ProjectItem : ObservableObject
     private string _devProcessStatusText = "Tidak ada proses dev latar belakang";
 
     [JsonIgnore]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanStartTunnel))]
+    [NotifyPropertyChangedFor(nameof(CanStopTunnel))]
+    [NotifyPropertyChangedFor(nameof(TunnelButtonText))]
+    [NotifyPropertyChangedFor(nameof(TunnelButtonTooltip))]
+    private bool _isTunnelRunning;
+
+    [JsonIgnore]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanStartTunnel))]
+    [NotifyPropertyChangedFor(nameof(CanStopTunnel))]
+    [NotifyPropertyChangedFor(nameof(TunnelButtonText))]
+    [NotifyPropertyChangedFor(nameof(TunnelButtonTooltip))]
+    private bool _isTunnelStarting;
+
+    [JsonIgnore]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPublicTunnelUrl))]
+    private string? _publicTunnelUrl;
+
+    [JsonIgnore]
+    [ObservableProperty]
+    private string _tunnelStatusText = "Tunnel nonaktif";
+
+    [JsonIgnore]
     public bool IsLaravel => FrameworkType == ProjectFramework.Laravel;
 
     [JsonIgnore]
@@ -116,6 +141,25 @@ public partial class ProjectItem : ObservableObject
 
     [JsonIgnore]
     public bool CanStopDevProcess => IsDevProcessRunning;
+
+    [JsonIgnore]
+    public bool HasPublicTunnelUrl => !string.IsNullOrWhiteSpace(PublicTunnelUrl);
+
+    [JsonIgnore]
+    public bool CanStartTunnel => !IsTunnelRunning && !IsTunnelStarting;
+
+    [JsonIgnore]
+    public bool CanStopTunnel => IsTunnelRunning || IsTunnelStarting;
+
+    [JsonIgnore]
+    public string TunnelButtonText => IsTunnelStarting
+        ? "⏳ Tunnel..."
+        : (IsTunnelRunning ? "⏹ Stop Share" : "🌐 Share");
+
+    [JsonIgnore]
+    public string TunnelButtonTooltip => IsTunnelRunning || IsTunnelStarting
+        ? "Hentikan Public Tunnel untuk proyek ini"
+        : "Bagikan situs .dra lokal ke internet sementara via Cloudflare Tunnel";
 
     [JsonIgnore]
     public string PrimaryUrlDisplay => HttpsEnabled && HasSslCertificate

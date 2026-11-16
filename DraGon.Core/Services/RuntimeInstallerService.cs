@@ -153,7 +153,8 @@ public sealed class RuntimeInstallerService
 
         DraGonPaths.EnsureDirectoriesExist(runtimeBasePath);
         var isPhar = downloadUrl.EndsWith(".phar", StringComparison.OrdinalIgnoreCase);
-        var ext = isPhar ? ".phar" : ".zip";
+        var isExe = downloadUrl.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+        var ext = isPhar ? ".phar" : (isExe ? ".exe" : ".zip");
         var zipFileName = $"{package.Id}-official-{DateTime.Now:yyyyMMddHHmmss}{ext}";
         var tempZipPath = Path.Combine(DraGonPaths.DownloadsCacheDirectory, zipFileName);
 
@@ -198,7 +199,7 @@ public sealed class RuntimeInstallerService
                 }
             }
 
-            if (isPhar)
+            if (isPhar || isExe)
             {
                 var baseDir = string.IsNullOrWhiteSpace(runtimeBasePath)
                     ? DraGonPaths.DefaultRuntimesDirectory
@@ -210,13 +211,26 @@ public sealed class RuntimeInstallerService
                     : Path.Combine(baseDir, package.ExpectedRelativeDir);
 
                 Directory.CreateDirectory(targetFolder);
-                var destPhar = Path.Combine(targetFolder, "composer.phar");
-                File.Copy(tempZipPath, destPhar, overwrite: true);
-                var batPath = Path.Combine(targetFolder, "composer.bat");
-                var batContent = "@echo off\r\nif exist \"%~dp0..\\php\\php.exe\" (\r\n  \"%~dp0..\\php\\php.exe\" \"%~dp0composer.phar\" %*\r\n) else (\r\n  php \"%~dp0composer.phar\" %*\r\n)\r\n";
-                await File.WriteAllTextAsync(batPath, batContent, cancellationToken);
-                progress?.Report((100, "Composer selesai dipasang."));
-                _logger.Info("Installer", $"Composer berhasil dipasang di {targetFolder}");
+
+                if (isPhar)
+                {
+                    var destPhar = Path.Combine(targetFolder, "composer.phar");
+                    File.Copy(tempZipPath, destPhar, overwrite: true);
+                    var batPath = Path.Combine(targetFolder, "composer.bat");
+                    var batContent = "@echo off\r\nif exist \"%~dp0..\\php\\php.exe\" (\r\n  \"%~dp0..\\php\\php.exe\" \"%~dp0composer.phar\" %*\r\n) else (\r\n  php \"%~dp0composer.phar\" %*\r\n)\r\n";
+                    await File.WriteAllTextAsync(batPath, batContent, cancellationToken);
+                    progress?.Report((100, "Composer selesai dipasang."));
+                    _logger.Info("Installer", $"Composer berhasil dipasang di {targetFolder}");
+                    return (true, $"Paket '{package.Name}' ({targetVerName}) berhasil dipasang ke '{targetFolder}'.");
+                }
+
+                var exeName = string.IsNullOrWhiteSpace(package.ExecutableFileName)
+                    ? $"{package.Id}.exe"
+                    : Path.GetFileName(package.ExecutableFileName);
+                var destExe = Path.Combine(targetFolder, exeName);
+                File.Copy(tempZipPath, destExe, overwrite: true);
+                progress?.Report((100, $"{package.Name} selesai dipasang."));
+                _logger.Info("Installer", $"{package.Name} berhasil dipasang di {destExe}");
                 return (true, $"Paket '{package.Name}' ({targetVerName}) berhasil dipasang ke '{targetFolder}'.");
             }
 

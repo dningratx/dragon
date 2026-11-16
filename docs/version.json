@@ -1,17 +1,16 @@
 {
-  "version": "1.2.1",
-  "name": "DraGon v1.2.1",
+  "version": "1.3.0",
+  "name": "DraGon v1.3.0",
   "releaseDate": "2026-11-16",
   "minWindowsVersion": "10.0.19041",
   "architecture": "win-x64",
-  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.2.1/DraGon-Setup.exe",
-  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.2.1/DraGon-win-x64.zip",
+  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.0/DraGon-Setup.exe",
+  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.0/DraGon-win-x64.zip",
   "changelog": [
-    "Perbaikan sinkronisasi daftar proyek lokal pada portal localhost (index.php root workspace) agar selalu cocok dengan portal welcome tanpa menimpa index.php kustom pengguna",
-    "Arsitektur Net Installer Modular: Ukuran installer awal ramping tanpa file runtime bawaan",
-    "Layar pemilihan komponen interaktif di Setup Wizard dengan perkiraan download real-time",
-    "Unduhan on-demand resmi dari vendor untuk Apache, Nginx, PHP 8.3/8.4, MariaDB 11.4, PostgreSQL 17, Composer, Node.js 22, phpMyAdmin, dan Python 3.12",
-    "Otomatisasi inisialisasi php.ini, database, port, dan registrasi ke Windows PATH",
-    "Sistem pembaruan aplikasi otomatis dan patch inkremental (Delta Update)"
+    "Fitur Public Tunnel / Share 1-Klik via Cloudflare Tunnel (cloudflared) langsung dari kartu proyek untuk membagikan situs .dra ke internet sementara (https://*.trycloudflare.com)",
+    "Unduh dan pasang cloudflared.exe otomatis on-demand saat Share pertama kali atau melalui menu Packages",
+    "Otomatis menyalakan Web Server & PHP-CGI serta menyalin URL publik ke clipboard saat tunnel aktif",
+    "Perbaikan sinkronisasi daftar proyek lokal pada portal localhost (index.php root workspace)",
+    "Arsitektur Net Installer Modular dengan pilihan komponen interaktif & Delta Update"
   ]
 }

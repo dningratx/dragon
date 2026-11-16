@@ -2,7 +2,7 @@
 
 # DraGon (.dra) — Local Development Environment
 
-[![Release](https://img.shields.io/badge/Release-v1.2.1-orange.svg)](https://github.com/dningratx/dragon/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.0-orange.svg)](https://github.com/dningratx/dragon/releases)
 [![Website](https://img.shields.io/badge/Website-dningratx.github.io%2Fdragon-success.svg)](https://dningratx.github.io/dragon/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://github.com/dningratx/dragon)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20Windows-512bd4.svg)](https://dotnet.microsoft.com/)
@@ -19,15 +19,15 @@
 
 ---
 
-## 🚀 Unduh DraGon v1.2.1 Terbaru
+## 🚀 Unduh DraGon v1.3.0 Terbaru
 
 Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
 
 | Paket Distribusi | Tipe | Deskripsi | Tautan Unduh |
 | :--- | :--- | :--- | :--- |
-| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.2.1/DraGon-Setup.exe) |
-| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.2.1/DraGon-win-x64.zip) |
-| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.2.1.zip**](https://github.com/dningratx/dragon/releases/download/v1.2.1/DraGon-Patch-v1.2.1.zip) |
+| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.3.0/DraGon-Setup.exe) |
+| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.0/DraGon-win-x64.zip) |
+| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.3.0.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.0/DraGon-Patch-v1.3.0.zip) |
 
 ---
 
@@ -57,7 +57,12 @@ Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
 - Template bawaan siap pakai: **Standar (PHP/Web)**, **Laravel** (`composer create-project`), **WordPress** (unduh resmi `wordpress.org`), dan **Git Clone**.
 - Tombol cepat untuk `php artisan serve`, `composer install`, dan `npm run dev` yang berjalan sebagai proses latar belakang terkelola.
 
-### 6. 🔄 Sistem Pembaruan Cerdas (Delta Update)
+### 6. 🌐 Public Tunnel / Share 1-Klik (`cloudflared`)
+- Bagikan situs `.dra` lokal ke internet sementara (`https://*.trycloudflare.com`) hanya dengan 1 klik tombol **`🌐 Share`** di kartu proyek—tanpa perlu akun Cloudflare.
+- Cocok untuk menguji webhook (Midtrans, Xendit, Stripe) maupun demo cepat ke klien.
+- Otomatis menyalakan Web Server & PHP-CGI jika belum aktif, mengunduh `cloudflared.exe` on-demand bila belum terpasang, serta menyalin URL publik ke clipboard.
+
+### 7. 🔄 Sistem Pembaruan Cerdas (Delta Update)
 - Fitur **"Periksa Pembaruan"** di menu Pengaturan.
 - Hanya mengunduh file patch yang berubah tanpa perlu mengunduh ulang runtime maupun merusak data database lokal.
 
@@ -106,7 +111,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Off
 powershell -ExecutionPolicy Bypass -File .\scripts\publish-release.ps1
 
 # 6. Membangun paket patch inkremental delta
-powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.2.1" -Changelog "Perbaikan sinkronisasi daftar proyek pada portal localhost."
+powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.3.0" -Changelog "Fitur Public Tunnel / Share 1-Klik via Cloudflare Tunnel (cloudflared)."
 ```
 
 ---
@@ -114,5 +119,5 @@ powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1
 ## 📄 Dokumentasi Rilis
 
 Informasi lengkap mengenai rilis versi, catatan perubahan, dan aset distribusi dapat dibaca pada:
-- [`RELEASE.md`](RELEASE.md) — Panduan rilis resmi v1.2.1 dan rincian paket distribusi.
+- [`RELEASE.md`](RELEASE.md) — Panduan rilis resmi v1.3.0 dan rincian paket distribusi.
 - [`dist/patch/update-manifest.json`](dist/patch/update-manifest.json) — Format manifes pembaruan aplikasi.

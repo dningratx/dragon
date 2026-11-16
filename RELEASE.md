@@ -1,16 +1,22 @@
-# DraGon v1.2.1 — Perbaikan Sinkronisasi Portal Localhost & Rilis Net Installer Modular
+# DraGon v1.3.0 — Public Tunnel / Share 1-Klik (`cloudflared`) & Net Installer Modular
 
 > **Tanggal Rilis:** 16 November 2026  
-> **Versi:** `v1.2.1`  
+> **Versi:** `v1.3.0`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.2.1
+## 🌟 Sorotan Pembaruan v1.3.0
 
-### Perbaikan Bug
-- **Sinkronisasi Portal `localhost` (`index.php` Root Workspace):** Memperbaiki bug di mana daftar proyek lokal (`.dra`) hanya muncul pada `localhost/welcome/` tetapi tidak ikut diperbarui pada halaman root `localhost` (`index.php`). Kini `ServerConfigGenerator` memperbarui `index.php` portal bawaan DraGon secara otomatis setiap kali proyek ditambah atau diperbarui, sambil tetap melindungi file `index.php` kustom milik pengguna.
+### Fitur Baru: Public Tunnel / Share 1-Klik (Cloudflare Tunnel)
+- **Bagikan Situs `.dra` ke Internet Sementara:** Klik tombol **`🌐 Share`** di kartu proyek untuk mengekspos virtual host `.dra` lokal ke URL publik `https://*.trycloudflare.com` tanpa perlu akun Cloudflare.
+- **Integrasi On-Demand `cloudflared.exe`:** Paket `cloudflared` tersedia di menu **Packages** dan dapat diunduh otomatis (~35 MB) saat Anda menekan **`🌐 Share`** untuk pertama kali.
+- **Otomatisasi Alur Kerja:** Otomatis menyalakan Web Server (Nginx/Apache) & PHP-CGI jika belum aktif, menampilkan bar URL publik di kartu proyek lengkap dengan tombol **`📋 Salin`** dan **`↗ Buka`**, serta menyalin URL langsung ke clipboard.
+- **Aman & Terkelola:** Proses tunnel berjalan di latar belakang per proyek dan otomatis dibersihkan saat menekan **`⏹ Stop Share`**, **Stop All Services**, atau saat aplikasi ditutup.
+
+### Perbaikan & Fitur Sebelumnya (v1.2.x)
+- **Sinkronisasi Portal `localhost` (`index.php` Root Workspace):** Memperbaiki sinkronisasi daftar proyek lokal (`.dra`) antara root `localhost` dan `localhost/welcome/` sambil melindungi file `index.php` kustom pengguna.
 
 ### Sorotan Fitur v1.2.x (Net Installer Modular)
 
@@ -53,7 +59,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.2.1.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.2.0/v1.1.0/v1.0.0). |
+| **`DraGon-Patch-v1.3.0.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.2.x/v1.1.0/v1.0.0). |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---

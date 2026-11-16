@@ -310,7 +310,7 @@ public sealed class CoreServicesTests
         var catalogService = new RuntimePackageCatalogService();
         var packages = catalogService.CreateCatalog();
 
-        Assert.Equal(11, packages.Count);
+        Assert.Equal(12, packages.Count);
         Assert.All(packages, p => Assert.True(p.HasDirectArchiveUrl, $"Package {p.Id} should have DirectArchiveDownloadUrl"));
         Assert.All(packages, p => Assert.True(p.AvailableVersions.Count > 0, $"Package {p.Id} should have AvailableVersions options"));
 
@@ -318,7 +318,7 @@ public sealed class CoreServicesTests
         if (Directory.Exists(runtimeDir))
         {
             catalogService.RefreshCatalogStatus(packages, runtimeDir);
-            var bundledPackages = packages.Where(p => p.Id != "postgresql" && p.Id != "python" && p.Id != "heidisql");
+            var bundledPackages = packages.Where(p => p.Id != "postgresql" && p.Id != "python" && p.Id != "heidisql" && p.Id != "cloudflared");
             Assert.All(bundledPackages, p => Assert.True(p.IsAvailable, $"Package {p.Id} should be available in {runtimeDir}"));
 
             var logger = new AppLogger();
@@ -693,5 +693,51 @@ public sealed class CoreServicesTests
                 Directory.Delete(tempWorkspace, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public void ProjectTunnelManager_ExtractTryCloudflareUrl_ParsesValidLogLine()
+    {
+        const string logLine = "2026-11-16T05:00:00Z INF |  https://gentle-dragon-42.trycloudflare.com                                  |";
+        var extracted = ProjectTunnelManager.ExtractTryCloudflareUrl(logLine);
+
+        Assert.Equal("https://gentle-dragon-42.trycloudflare.com", extracted);
+        Assert.Null(ProjectTunnelManager.ExtractTryCloudflareUrl("2026-11-16T05:00:00Z INF Starting tunnel"));
+        Assert.Null(ProjectTunnelManager.ExtractTryCloudflareUrl(null));
+    }
+
+    [Fact]
+    public void RuntimePackageCatalog_IncludesCloudflaredPackage()
+    {
+        var catalog = new RuntimePackageCatalogService().CreateCatalog();
+        var cloudflared = catalog.FirstOrDefault(p => p.Id == "cloudflared");
+
+        Assert.NotNull(cloudflared);
+        Assert.Equal("cloudflared.exe", cloudflared.ExecutableFileName);
+        Assert.EndsWith(".exe", cloudflared.DirectArchiveDownloadUrl, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ProjectItem_TunnelProperties_UpdateComputedStates()
+    {
+        var item = new ProjectItem { Name = "Tokoku", Domain = "tokoku.dra" };
+
+        Assert.True(item.CanStartTunnel);
+        Assert.False(item.CanStopTunnel);
+        Assert.False(item.HasPublicTunnelUrl);
+        Assert.Equal("🌐 Share", item.TunnelButtonText);
+
+        item.IsTunnelStarting = true;
+        Assert.False(item.CanStartTunnel);
+        Assert.True(item.CanStopTunnel);
+        Assert.Equal("⏳ Tunnel...", item.TunnelButtonText);
+
+        item.IsTunnelStarting = false;
+        item.IsTunnelRunning = true;
+        item.PublicTunnelUrl = "https://tokoku-demo.trycloudflare.com";
+        Assert.False(item.CanStartTunnel);
+        Assert.True(item.CanStopTunnel);
+        Assert.True(item.HasPublicTunnelUrl);
+        Assert.Equal("⏹ Stop Share", item.TunnelButtonText);
     }
 }
