@@ -1,9 +1,14 @@
-﻿$ErrorActionPreference = "Stop"
+﻿param(
+    [string]$Tag = "v1.3.0",
+    [string]$Title = "DraGon v1.3.0 — Public Tunnel / Share 1-Klik (cloudflared) & Net Installer Modular"
+)
+
+$ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $DistRoot = Join-Path $RepoRoot "dist"
 $NotesPath = Join-Path $RepoRoot "RELEASE.md"
 
-Write-Host "=== Mempublikasikan GitHub Release v1.2.1 via GitHub API ===" -ForegroundColor Cyan
+Write-Host "=== Mempublikasikan GitHub Release $Tag via GitHub API ===" -ForegroundColor Cyan
 
 # 1. Dapatkan token dningratx dari Git Credential Manager
 $lines = @('protocol=https', 'host=github.com', 'username=dningratx') | git credential fill
@@ -32,15 +37,15 @@ $bodyContent = if (Test-Path $NotesPath) {
 }
 
 $releasePayload = @{
-    tag_name = "v1.2.1"
+    tag_name = $Tag
     target_commitish = "main"
-    name = "DraGon v1.2.1 — Net Installer Modular & Unduhan Komponen On-Demand"
+    name = $Title
     body = $bodyContent
     draft = $false
     prerelease = $false
 } | ConvertTo-Json -Depth 5
 
-Write-Host "1. Membuat GitHub Release v1.2.1..." -ForegroundColor Yellow
+Write-Host "1. Membuat GitHub Release $Tag..." -ForegroundColor Yellow
 $createUrl = "https://api.github.com/repos/dningratx/dragon/releases"
 
 try {
@@ -48,18 +53,18 @@ try {
 } catch {
     # Jika release sudah ada, ambil datanya
     Write-Host "Release mungkin sudah ada, mencoba mengambil data rilis..." -ForegroundColor Yellow
-    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/dningratx/dragon/releases/tags/v1.2.1" -Method Get -Headers $headers
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/dningratx/dragon/releases/tags/$Tag" -Method Get -Headers $headers
 }
 
 $releaseId = $release.id
 Write-Host "Release berhasil dibuat / ditemukan (ID: $releaseId)!" -ForegroundColor Green
 Write-Host "URL: $($release.html_url)" -ForegroundColor Cyan
 
-# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-v1.2.1.zip, update-manifest.json)
+# 3. Unggah file aset (DraGon-Setup.exe, DraGon-win-x64.zip, DraGon-Patch-$Tag.zip, update-manifest.json)
 $filesToUpload = @(
     (Join-Path $DistRoot "DraGon-Setup.exe"),
     (Join-Path $DistRoot "DraGon-win-x64.zip"),
-    (Join-Path $DistRoot "patch\DraGon-Patch-v1.2.1.zip"),
+    (Join-Path $DistRoot "patch\DraGon-Patch-$Tag.zip"),
     (Join-Path $DistRoot "patch\update-manifest.json")
 )
 
