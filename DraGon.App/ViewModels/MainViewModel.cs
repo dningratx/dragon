@@ -2975,7 +2975,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
             UpdateDownloadStatusText = "Menerapkan pembaruan aplikasi...";
 
-            var targetAppDir = DraGonPaths.ResolveEffectiveApplicationDirectory(_activeSettings.ApplicationFolderPath);
+            var runningExeDir = !string.IsNullOrWhiteSpace(Environment.ProcessPath)
+                ? Path.GetDirectoryName(Environment.ProcessPath)
+                : null;
+            var targetAppDir = !string.IsNullOrWhiteSpace(runningExeDir) &&
+                               File.Exists(Path.Combine(runningExeDir, "DraGon.App.exe")) &&
+                               !runningExeDir.Contains(@"\bin\Debug", StringComparison.OrdinalIgnoreCase) &&
+                               !runningExeDir.Contains(@"\bin\Release", StringComparison.OrdinalIgnoreCase)
+                ? runningExeDir
+                : DraGonPaths.ResolveEffectiveApplicationDirectory(_activeSettings.ApplicationFolderPath);
             var currentPid = Environment.ProcessId;
 
             // Jika aplikasi berjalan di mode development (Visual Studio / dotnet run), ekstrak langsung
