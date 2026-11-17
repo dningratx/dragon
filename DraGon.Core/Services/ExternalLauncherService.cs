@@ -95,7 +95,7 @@ public sealed class ExternalLauncherService
                 UseShellExecute = false
             };
 
-            InjectRuntimePathsToEnvironment(psi, settings.RuntimeBasePath);
+            InjectRuntimePathsToEnvironment(psi, settings);
             psi.ArgumentList.Add("-NoExit");
             psi.ArgumentList.Add("-Command");
             psi.ArgumentList.Add("Write-Host '=== Terminal Proyek DraGon ===' -ForegroundColor Cyan; Write-Host ('Lokasi: ' + (Get-Location)) -ForegroundColor Gray");
@@ -116,7 +116,7 @@ public sealed class ExternalLauncherService
                     WorkingDirectory = fullPath,
                     UseShellExecute = false
                 };
-                InjectRuntimePathsToEnvironment(cmdPsi, settings.RuntimeBasePath);
+                InjectRuntimePathsToEnvironment(cmdPsi, settings);
                 cmdPsi.ArgumentList.Add("/K");
                 cmdPsi.ArgumentList.Add("echo === Terminal DraGon (cmd.exe) === & cd");
                 Process.Start(cmdPsi);
@@ -153,7 +153,7 @@ public sealed class ExternalLauncherService
                 UseShellExecute = false
             };
 
-            InjectRuntimePathsToEnvironment(psi, settings.RuntimeBasePath);
+            InjectRuntimePathsToEnvironment(psi, settings);
             psi.ArgumentList.Add("-NoExit");
             psi.ArgumentList.Add("-Command");
             psi.ArgumentList.Add($"Write-Host '=== Terminal DraGon ===' -ForegroundColor Cyan; Write-Host ('Perintah: ' + '{initialCommand.Replace("'", "''")}') -ForegroundColor Yellow; {initialCommand}");
@@ -174,7 +174,7 @@ public sealed class ExternalLauncherService
                     WorkingDirectory = fullPath,
                     UseShellExecute = false
                 };
-                InjectRuntimePathsToEnvironment(cmdPsi, settings.RuntimeBasePath);
+                InjectRuntimePathsToEnvironment(cmdPsi, settings);
                 cmdPsi.ArgumentList.Add("/K");
                 cmdPsi.ArgumentList.Add(initialCommand);
                 Process.Start(cmdPsi);
@@ -365,7 +365,7 @@ public sealed class ExternalLauncherService
                 UseShellExecute = false
             };
 
-            InjectRuntimePathsToEnvironment(psi, settings.RuntimeBasePath);
+            InjectRuntimePathsToEnvironment(psi, settings);
             psi.ArgumentList.Add("/K");
             psi.ArgumentList.Add(exeToResolve);
             foreach (var arg in fixedArguments)
@@ -433,13 +433,14 @@ public sealed class ExternalLauncherService
         return "powershell.exe";
     }
 
-    private static void InjectRuntimePathsToEnvironment(ProcessStartInfo psi, string runtimeBasePath)
+    private static void InjectRuntimePathsToEnvironment(ProcessStartInfo psi, AppSettings settings)
     {
-        var baseDir = string.IsNullOrWhiteSpace(runtimeBasePath)
+        var baseDir = string.IsNullOrWhiteSpace(settings.RuntimeBasePath)
             ? DraGonPaths.DefaultRuntimesDirectory
-            : runtimeBasePath;
+            : settings.RuntimeBasePath;
 
-        var extraDirs = new List<string>();
+        // Prioritaskan direktori runtime aktif (sesuai versi PHP & Database yang dipilih pengguna)
+        var extraDirs = EnvironmentPathService.ResolveRuntimeBinaryDirectories(baseDir, settings);
 
         void AddCandidates(string packageSubfolder, params string[] relativeSubPaths)
         {
@@ -466,15 +467,8 @@ public sealed class ExternalLauncherService
             catch { }
         }
 
-        AddCandidates("php", "");
-        AddCandidates("composer", "");
-        AddCandidates("nodejs", "");
-        AddCandidates("mariadb", "bin", "");
-        AddCandidates("mysql", "bin", "");
         AddCandidates("postgresql", "bin", "");
-        AddCandidates("git", "cmd", "bin", "");
         AddCandidates("nginx", "");
-        AddCandidates("apache", "bin", "");
         AddCandidates("python", "Scripts", "");
         AddCandidates("heidisql", "");
 
@@ -491,8 +485,32 @@ public sealed class ExternalLauncherService
         }
 
         var distinctDirs = extraDirs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+        // Saring entri runtime PHP/DB lama dari PATH proses saat ini agar tidak menimpa versi aktif yang dipilih
+        var phpRoot = Path.GetFullPath(Path.Combine(baseDir, "php")).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var mariaRoot = Path.GetFullPath(Path.Combine(baseDir, "mariadb")).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var mysqlRoot = Path.GetFullPath(Path.Combine(baseDir, "mysql")).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
         var currentPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-        psi.Environment["PATH"] = string.Join(Path.PathSeparator, distinctDirs) + Path.PathSeparator + currentPath;
+        var filteredCurrent = currentPath
+            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(entry =>
+            {
+                try
+                {
+                    var norm = Path.GetFullPath(entry).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    return !norm.StartsWith(phpRoot, StringComparison.OrdinalIgnoreCase) &&
+                           !norm.StartsWith(mariaRoot, StringComparison.OrdinalIgnoreCase) &&
+                           !norm.StartsWith(mysqlRoot, StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    return true;
+                }
+            });
+
+        var merged = distinctDirs.Concat(filteredCurrent).Distinct(StringComparer.OrdinalIgnoreCase);
+        psi.Environment["PATH"] = string.Join(Path.PathSeparator, merged);
     }
 
     private static string? ResolveBrowserExecutable(AppSettings settings)

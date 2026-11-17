@@ -191,13 +191,8 @@ public static class EnvironmentPathService
         var phpRoot = Path.Combine(runtimeBasePath, "php");
         if (!Directory.Exists(phpRoot)) return null;
 
-        // Jika ada selected PHP version id
-        if (!string.IsNullOrWhiteSpace(settings?.SelectedPhpVersionId))
-        {
-            var match = Directory.GetDirectories(phpRoot)
-                .FirstOrDefault(d => Path.GetFileName(d).Contains(settings.SelectedPhpVersionId, StringComparison.OrdinalIgnoreCase) && File.Exists(Path.Combine(d, "php.exe")));
-            if (match is not null) return match;
-        }
+        var matched = MatchSelectedVersionDirectory(phpRoot, settings?.SelectedPhpVersionId, "php.exe");
+        if (matched is not null) return matched;
 
         // Cari subfolder yang memiliki php.exe
         var directExe = Path.Combine(phpRoot, "php.exe");
@@ -225,13 +220,8 @@ public static class EnvironmentPathService
             var dbRoot = Path.Combine(runtimeBasePath, rootName);
             if (!Directory.Exists(dbRoot)) continue;
 
-            if (!string.IsNullOrWhiteSpace(settings?.SelectedDatabaseVersionId))
-            {
-                var match = Directory.GetDirectories(dbRoot)
-                    .FirstOrDefault(d => Path.GetFileName(d).Contains(settings.SelectedDatabaseVersionId, StringComparison.OrdinalIgnoreCase) &&
-                                         File.Exists(Path.Combine(d, "bin", "mysql.exe")));
-                if (match is not null) return Path.Combine(match, "bin");
-            }
+            var matched = MatchSelectedVersionDirectory(dbRoot, settings?.SelectedDatabaseVersionId, Path.Combine("bin", "mysql.exe"));
+            if (matched is not null) return Path.Combine(matched, "bin");
 
             var directBin = Path.Combine(dbRoot, "bin", "mysql.exe");
             if (File.Exists(directBin)) return Path.Combine(dbRoot, "bin");
@@ -242,6 +232,25 @@ public static class EnvironmentPathService
         }
 
         return null;
+    }
+
+    private static string? MatchSelectedVersionDirectory(string rootDir, string? selectedVersionId, string relativeExePath)
+    {
+        if (string.IsNullOrWhiteSpace(selectedVersionId) || !Directory.Exists(rootDir))
+        {
+            return null;
+        }
+
+        var candidates = Directory.GetDirectories(rootDir)
+            .Where(d => File.Exists(Path.Combine(d, relativeExePath)))
+            .Select(d => new { Dir = d, Name = Path.GetFileName(d) })
+            .OrderByDescending(x => x.Name.Length)
+            .ToList();
+
+        return candidates.FirstOrDefault(x => string.Equals(x.Name, selectedVersionId, StringComparison.OrdinalIgnoreCase))?.Dir
+            ?? candidates.FirstOrDefault(x => selectedVersionId.StartsWith(x.Name + "-", StringComparison.OrdinalIgnoreCase))?.Dir
+            ?? candidates.FirstOrDefault(x => x.Name.Contains(selectedVersionId, StringComparison.OrdinalIgnoreCase) ||
+                                             selectedVersionId.Contains(x.Name, StringComparison.OrdinalIgnoreCase))?.Dir;
     }
 
     private static string? ResolveNodeJsDirectory(string runtimeBasePath)

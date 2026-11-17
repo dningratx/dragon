@@ -283,11 +283,14 @@ public sealed class AppUpdateService
         string patchZipPath,
         string targetDirectory,
         int currentProcessId,
-        bool restartApp = true)
+        bool restartApp = true,
+        string? updatesDirectoryOverride = null)
     {
         try
         {
-            var updatesDir = DraGonPaths.UpdatesDirectory;
+            var updatesDir = string.IsNullOrWhiteSpace(updatesDirectoryOverride)
+                ? DraGonPaths.UpdatesDirectory
+                : updatesDirectoryOverride;
             Directory.CreateDirectory(updatesDir);
 
             var scriptPath = Path.Combine(updatesDir, "apply-patch.ps1");
@@ -305,6 +308,8 @@ public sealed class AppUpdateService
             scriptContent.AppendLine($"$StagingDir = '{stagingDir.Replace("'", "''")}'");
             scriptContent.AppendLine("function Write-PatchLog($msg) { Add-Content -Path $LogFile -Value \"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $msg\" -Encoding UTF8 }");
             scriptContent.AppendLine("try {");
+            scriptContent.AppendLine("    $ZipPath = $ZipPath.Trim(\"'\", '\"')");
+            scriptContent.AppendLine("    $TargetDir = $TargetDir.Trim(\"'\", '\"')");
             scriptContent.AppendLine("    Write-PatchLog \"Memulai apply-patch.ps1 (PID=$ProcessId, TargetDir=$TargetDir)\"");
             scriptContent.AppendLine("    if ($ProcessId -gt 0) {");
             scriptContent.AppendLine("        for ($i = 0; $i -lt 60; $i++) {");
@@ -348,19 +353,30 @@ public sealed class AppUpdateService
 
             File.WriteAllText(scriptPath, scriptContent.ToString(), Encoding.UTF8);
 
-            var restartFlag = restartApp ? "-Restart" : "";
-            var escapedZip = patchZipPath.Replace("'", "''");
-            var escapedTarget = targetDirectory.Replace("'", "''");
-            var arguments = $"-ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\" -ProcessId {currentProcessId} -ZipPath '{escapedZip}' -TargetDir '{escapedTarget}' {restartFlag}".Trim();
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = arguments,
-                UseShellExecute = true,
+                UseShellExecute = false,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden
             };
+            startInfo.ArgumentList.Add("-NoProfile");
+            startInfo.ArgumentList.Add("-ExecutionPolicy");
+            startInfo.ArgumentList.Add("Bypass");
+            startInfo.ArgumentList.Add("-WindowStyle");
+            startInfo.ArgumentList.Add("Hidden");
+            startInfo.ArgumentList.Add("-File");
+            startInfo.ArgumentList.Add(scriptPath);
+            startInfo.ArgumentList.Add("-ProcessId");
+            startInfo.ArgumentList.Add(currentProcessId.ToString());
+            startInfo.ArgumentList.Add("-ZipPath");
+            startInfo.ArgumentList.Add(patchZipPath);
+            startInfo.ArgumentList.Add("-TargetDir");
+            startInfo.ArgumentList.Add(targetDirectory);
+            if (restartApp)
+            {
+                startInfo.ArgumentList.Add("-Restart");
+            }
 
             Process.Start(startInfo);
             _logger.Info("Update", $"Updater script diluncurkan. Menyiapkan penggantian berkas patch dan restart DraGon.");

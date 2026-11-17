@@ -740,4 +740,34 @@ public sealed class CoreServicesTests
         Assert.True(item.HasPublicTunnelUrl);
         Assert.Equal("⏹ Stop Share", item.TunnelButtonText);
     }
+
+    [Fact]
+    public void EnvironmentPathService_ResolveRuntimeBinaryDirectories_SelectsConfiguredPhpVersion()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"dragon_env_test_{Guid.NewGuid():N}");
+        try
+        {
+            var php83 = Path.Combine(tempRoot, "php", "php-8.3.36");
+            var php84 = Path.Combine(tempRoot, "php", "php-8.4");
+            Directory.CreateDirectory(php83);
+            Directory.CreateDirectory(php84);
+            File.WriteAllText(Path.Combine(php83, "php.exe"), "");
+            File.WriteAllText(Path.Combine(php84, "php.exe"), "");
+
+            var settings = new AppSettings
+            {
+                RuntimeBasePath = tempRoot,
+                SelectedPhpVersionId = "php-8.4-8.4.27"
+            };
+
+            var dirs = EnvironmentPathService.ResolveRuntimeBinaryDirectories(tempRoot, settings);
+
+            Assert.Contains(Path.GetFullPath(php84), dirs, StringComparer.OrdinalIgnoreCase);
+            Assert.DoesNotContain(Path.GetFullPath(php83), dirs, StringComparer.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            try { Directory.Delete(tempRoot, recursive: true); } catch { }
+        }
+    }
 }

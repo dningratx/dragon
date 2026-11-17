@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="DraGon — Lingkungan Development Lokal Windows (.dra)"
         Icon="pack://application:,,,/Assets/dragon-icon.ico"
-        Width="760"
-        Height="480"
+        Width="700"
+        Height="410"
         MinWidth="560"
         MinHeight="360"
         WindowStartupLocation="CenterScreen"
@@ -188,78 +188,60 @@
                     Background="{DynamicResource SidebarBgBrush}"
                     BorderBrush="{DynamicResource BorderSubtleBrush}"
                     BorderThickness="0,0,0,1"
-                    Padding="10,5">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding EnvironmentSummaryText}"
-                                   FontSize="12.5"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <TextBlock Text="{Binding ActivePortsSummaryText}"
-                                   FontSize="10.5"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   Margin="0,1,0,0" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="🗄️ PMA"
-                                ToolTip="Buka phpMyAdmin di browser"
-                                Padding="6,3"
-                                FontSize="10.5"
-                                Command="{Binding OpenPhpMyAdminInBrowserCommand}"
-                                Margin="0,0,4,0" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="🐬 DB"
-                                ToolTip="Buka HeidiSQL Database Manager GUI"
-                                Padding="6,3"
-                                FontSize="10.5"
-                                Command="{Binding OpenHeidiSqlCommand}"
-                                Margin="0,0,4,0" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="🐘 PHP"
-                                ToolTip="Buka phpinfo() di browser"
-                                Padding="6,3"
-                                FontSize="10.5"
-                                Command="{Binding OpenPhpInfoInBrowserCommand}"
-                                Margin="0,0,6,0" />
-                        <Button Style="{StaticResource PrimaryButtonStyle}"
-                                Content="▶ Start"
-                                ToolTip="Jalankan seluruh layanan utama (Web Server, PHP-CGI, MariaDB)"
-                                Padding="8,3"
-                                FontSize="10.5"
-                                IsEnabled="{Binding CanStartAllServices}"
-                                Command="{Binding StartAllServicesCommand}"
-                                Margin="0,0,4,0" />
-                        <Button Style="{StaticResource DangerButtonStyle}"
-                                Content="■ Stop"
-                                ToolTip="Hentikan seluruh layanan yang sedang berjalan"
-                                Padding="8,3"
-                                FontSize="10.5"
-                                IsEnabled="{Binding CanStopAllServices}"
-                                Command="{Binding StopAllServicesCommand}"
-                                Margin="0,0,4,0" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="🔄"
-                                ToolTip="Muat ulang konfigurasi vhost &amp; restart layanan web aktif"
-                                Padding="6,3"
-                                FontSize="10.5"
-                                IsEnabled="{Binding CanReloadServices}"
-                                Command="{Binding ReloadServicesCommand}"
-                                Margin="0,0,4,0" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}"
-                                Content="⟳"
-                                ToolTip="Segarkan status layanan"
-                                Padding="6,3"
-                                FontSize="10.5"
-                                Command="{Binding RefreshAllEnvironmentStatusCommand}" />
-                    </StackPanel>
-                </Grid>
+                    Padding="10,6">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="🗄️ PMA"
+                            ToolTip="Buka phpMyAdmin di browser"
+                            Padding="6,3"
+                            FontSize="10.5"
+                            Command="{Binding OpenPhpMyAdminInBrowserCommand}"
+                            Margin="0,0,4,0" />
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="🐬 DB"
+                            ToolTip="Buka HeidiSQL Database Manager GUI"
+                            Padding="6,3"
+                            FontSize="10.5"
+                            Command="{Binding OpenHeidiSqlCommand}"
+                            Margin="0,0,4,0" />
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="🐘 PHP"
+                            ToolTip="Buka phpinfo() di browser"
+                            Padding="6,3"
+                            FontSize="10.5"
+                            Command="{Binding OpenPhpInfoInBrowserCommand}"
+                            Margin="0,0,6,0" />
+                    <Button Style="{StaticResource PrimaryButtonStyle}"
+                            Content="▶ Start"
+                            ToolTip="Jalankan seluruh layanan utama (Web Server, PHP-CGI, MariaDB)"
+                            Padding="8,3"
+                            FontSize="10.5"
+                            IsEnabled="{Binding CanStartAllServices}"
+                            Command="{Binding StartAllServicesCommand}"
+                            Margin="0,0,4,0" />
+                    <Button Style="{StaticResource DangerButtonStyle}"
+                            Content="■ Stop"
+                            ToolTip="Hentikan seluruh layanan yang sedang berjalan"
+                            Padding="8,3"
+                            FontSize="10.5"
+                            IsEnabled="{Binding CanStopAllServices}"
+                            Command="{Binding StopAllServicesCommand}"
+                            Margin="0,0,4,0" />
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="🔄"
+                            ToolTip="Muat ulang konfigurasi vhost &amp; restart layanan web aktif"
+                            Padding="6,3"
+                            FontSize="10.5"
+                            IsEnabled="{Binding CanReloadServices}"
+                            Command="{Binding ReloadServicesCommand}"
+                            Margin="0,0,4,0" />
+                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                            Content="⟳"
+                            ToolTip="Segarkan status layanan"
+                            Padding="6,3"
+                            FontSize="10.5"
+                            Command="{Binding RefreshAllEnvironmentStatusCommand}" />
+                </StackPanel>
             </Border>
 
             <!-- Busy Indicator & Notification Banner -->
@@ -446,22 +428,13 @@
                                                                Foreground="{DynamicResource TextMutedBrush}" />
                                                 </StackPanel>
 
-                                                <Border Grid.Column="1"
-                                                        Background="{DynamicResource CardAltBgBrush}"
-                                                        CornerRadius="10"
-                                                        Padding="8,3"
-                                                        VerticalAlignment="Top">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Ellipse Width="7" Height="7"
-                                                                 Fill="{Binding Status, Converter={StaticResource ServiceStatusToBrush}}"
-                                                                 Margin="0,0,5,0"
-                                                                 VerticalAlignment="Center" />
-                                                        <TextBlock Text="{Binding StatusLabel}"
-                                                                   FontSize="11"
-                                                                   FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                    </StackPanel>
-                                                </Border>
+                                                <Ellipse Grid.Column="1"
+                                                         Width="8"
+                                                         Height="8"
+                                                         Fill="{Binding Status, Converter={StaticResource ServiceStatusToBrush}}"
+                                                         ToolTip="{Binding StatusLabel}"
+                                                         Margin="8,4,0,0"
+                                                         VerticalAlignment="Top" />
                                             </Grid>
 
                                             <StackPanel Grid.Row="1" Margin="0,8,0,10">

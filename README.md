@@ -2,7 +2,7 @@
 
 # DraGon (.dra) — Local Development Environment
 
-[![Release](https://img.shields.io/badge/Release-v1.3.2-orange.svg)](https://github.com/dningratx/dragon/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.3-orange.svg)](https://github.com/dningratx/dragon/releases)
 [![Website](https://img.shields.io/badge/Website-dningratx.github.io%2Fdragon-success.svg)](https://dningratx.github.io/dragon/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://github.com/dningratx/dragon)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20Windows-512bd4.svg)](https://dotnet.microsoft.com/)
@@ -19,15 +19,15 @@
 
 ---
 
-## 🚀 Unduh DraGon v1.3.2 Terbaru
+## 🚀 Unduh DraGon v1.3.3 Terbaru
 
 Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
 
 | Paket Distribusi | Tipe | Deskripsi | Tautan Unduh |
 | :--- | :--- | :--- | :--- |
-| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.3.2/DraGon-Setup.exe) |
-| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.2/DraGon-win-x64.zip) |
-| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.3.2.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.2/DraGon-Patch-v1.3.2.zip) |
+| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-Setup.exe) |
+| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-win-x64.zip) |
+| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.3.3.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-Patch-v1.3.3.zip) |
 
 ---
 
@@ -79,7 +79,7 @@ DRAGON/
 ├── DraGon.Elevator/            # Helper CLI ringan untuk meminta elevasi UAC (hosts file)
 ├── DraGon.App/                 # Aplikasi Desktop WPF (MVVM, Dark/Light Theme, Auto-Updater)
 ├── DraGon.Installer/           # Wizard Installer Mandiri GUI (DraGon-Setup.exe)
-├── DraGon.Tests/               # Pengujian unit otomatis 54 skenario (xUnit)
+├── DraGon.Tests/               # Pengujian unit otomatis 59 skenario (xUnit)
 ├── docs/                       # Halaman dokumentasi web (GitHub Pages)
 └── scripts/
     ├── publish-release.ps1     # Skrip pembuat paket distribusi rilis portabel (ZIP)

@@ -444,6 +444,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             _phpVersionManager.EnsurePhpIniConfigured(value);
             _configService.SaveSettings(_activeSettings);
             _serviceManager.RefreshServiceStates(_activeSettings);
+            EnvironmentPathService.SyncUserEnvironmentPath(_activeSettings.RuntimeBasePath, _activeSettings, _logger);
             ShowNotification(
                 "Versi PHP Diperbarui",
                 $"Versi PHP aktif diubah ke {value.DisplayName}. Jika layanan PHP FastCGI sedang berjalan, mulai ulang layanan agar menggunakan versi baru.",
@@ -470,6 +471,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             _activeSettings.SelectedDatabaseVersionId = value.Id;
             _configService.SaveSettings(_activeSettings);
             _serviceManager.RefreshServiceStates(_activeSettings);
+            EnvironmentPathService.SyncUserEnvironmentPath(_activeSettings.RuntimeBasePath, _activeSettings, _logger);
             ShowNotification(
                 "Versi Database Diperbarui",
                 $"Versi MariaDB/MySQL aktif diubah ke {value.DisplayName}. Jika layanan database sedang berjalan, mulai ulang layanan agar menggunakan versi baru.",

@@ -1,19 +1,28 @@
-# DraGon v1.3.2 — UI Pembaruan Bersih, Perbaikan Auto-Updater, & Public Tunnel (`cloudflared`)
+# DraGon v1.3.3 — Perbaikan Auto-Updater Patch, Sinkronisasi PHP CLI Terminal & UI Compact
 
-> **Tanggal Rilis:** 16 November 2026  
-> **Versi:** `v1.3.2`  
+> **Tanggal Rilis:** 17 November 2026  
+> **Versi:** `v1.3.3`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.3.2
+## 🌟 Sorotan Pembaruan v1.3.3
 
-### Penyempurnaan UI & Perbaikan Bug
-- **Pembersihan Menu Pembaruan:** Menghilangkan tombol `Demo Update Kecil` dari halaman Pengaturan agar antarmuka pembaruan aplikasi lebih bersih dan fokus pada rilis produksi.
-- **Perbaikan Auto-Updater Patch (`apply-patch.ps1`):** Memastikan penimpaan `DraGon.App.exe` menunggu proses keluar sepenuhnya (hingga 30 detik), mengekstrak ke staging, melakukan retry penyalinan file terkunci, serta menargetkan direktori `.exe` aktif (`Environment.ProcessPath`).
+### Perbaikan Bug & Sinkronisasi Sistem
+- **Perbaikan Auto-Updater Patch (`PrepareAndLaunchPatchUpdater`):** Mengganti pengoperan argumen `powershell.exe -File` dari tanda kutip tunggal manual ke `ProcessStartInfo.ArgumentList` (`UseShellExecute = false`), sehingga `Expand-Archive` tidak lagi gagal membaca path ZIP dan tidak memicu notifikasi update berulang setelah patch dipasang.
+- **Perbaikan Sinkronisasi PHP & Database CLI di Terminal & Windows `PATH`:**
+  - Memperbaiki pencocokan `SelectedPhpVersionId` (mis. `php-8.4-8.4.27` terhadap folder `php-8.4`) dan `SelectedDatabaseVersionId` di `EnvironmentPathService` agar `php -v` di Terminal DraGon maupun Command Prompt selalu mengikuti versi aktif yang dipilih.
+  - Memperbarui `ExternalLauncherService.InjectRuntimePathsToEnvironment` agar memprioritaskan hanya versi PHP & Database aktif serta menyaring entri versi lama dari `PATH`.
+- **Penyempurnaan UI Dashboard Compact:**
+  - Ukuran jendela awal dibuat lebih ringkas dan pas (`700×410`).
+  - Tombol aksi top bar (`PMA`, `DB`, `PHP`, `Start`, `Stop`, `Reload`, `Refresh`) diratakan ke kiri tanpa teks ringkasan berlebih.
+  - Card layanan disederhanakan tanpa teks status `"Berjalan"` / `"Berhenti"` sehingga judul layanan (seperti `MariaDB / MySQL Database`) tampil utuh dengan titik indikator warna.
 
-### Fitur Baru (v1.3.x): Public Tunnel / Share 1-Klik (Cloudflare Tunnel)
+> **Catatan Upgrade untuk Pengguna v1.3.1 / v1.3.2:**  
+> Karena perbaikan auto-updater patch baru tersedia mulai rilis ini, pengguna **v1.3.1** dan **v1.3.2** disarankan memperbarui satu kali menggunakan **`DraGon-Setup.exe`** (Net Installer) atau menimpa `DraGon.App.exe` dari **`DraGon-win-x64.zip`**. Setelah berada di `v1.3.3`, pembaruan Patch berikutnya akan berjalan otomatis.
+
+### Fitur Sebelumnya (v1.3.x): Public Tunnel / Share 1-Klik (Cloudflare Tunnel)
 - **Bagikan Situs `.dra` ke Internet Sementara:** Klik tombol **`🌐 Share`** di kartu proyek untuk mengekspos virtual host `.dra` lokal ke URL publik `https://*.trycloudflare.com` tanpa perlu akun Cloudflare.
 - **Integrasi On-Demand `cloudflared.exe`:** Paket `cloudflared` tersedia di menu **Packages** dan dapat diunduh otomatis (~35 MB) saat Anda menekan **`🌐 Share`** untuk pertama kali.
 - **Otomatisasi Alur Kerja:** Otomatis menyalakan Web Server (Nginx/Apache) & PHP-CGI jika belum aktif, menampilkan bar URL publik di kartu proyek lengkap dengan tombol **`📋 Salin`** dan **`↗ Buka`**, serta menyalin URL langsung ke clipboard.
@@ -63,7 +72,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.3.2.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi sebelumnya (v1.3.x/v1.2.x/v1.1.0/v1.0.0). |
+| **`DraGon-Patch-v1.3.3.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi `v1.3.3+`. |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---

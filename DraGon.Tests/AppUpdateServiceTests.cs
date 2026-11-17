@@ -155,6 +155,41 @@ public sealed class AppUpdateServiceTests : IDisposable
         Assert.Equal("{ \"theme\": \"Dark\", \"userSetting\": true }", File.ReadAllText(userConfigPath));
     }
 
+    [Fact]
+    public async Task PrepareAndLaunchPatchUpdater_ExecutesScriptAndAppliesPatch_WithSpacesInPaths()
+    {
+        var updatesDir = Path.Combine(_testTempDir, "updates dir");
+        var appDir = Path.Combine(_testTempDir, "app dir");
+        Directory.CreateDirectory(updatesDir);
+        Directory.CreateDirectory(appDir);
+
+        var targetExe = Path.Combine(appDir, "DraGon.App.exe");
+        await File.WriteAllTextAsync(targetExe, "OLD-BINARY-1.3.1");
+
+        var patchZip = Path.Combine(updatesDir, "DraGon-Patch-v1.3.2.zip");
+        AppUpdateService.CreateSamplePatchPackage(patchZip, new Dictionary<string, string>
+        {
+            ["DraGon.App.exe"] = "NEW-BINARY-1.3.2"
+        });
+
+        var (success, message) = _updateService.PrepareAndLaunchPatchUpdater(
+            patchZip,
+            appDir,
+            currentProcessId: 0,
+            restartApp: false,
+            updatesDirectoryOverride: updatesDir);
+
+        Assert.True(success, message);
+
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (DateTime.UtcNow < deadline && await File.ReadAllTextAsync(targetExe) != "NEW-BINARY-1.3.2")
+        {
+            await Task.Delay(250);
+        }
+
+        Assert.Equal("NEW-BINARY-1.3.2", await File.ReadAllTextAsync(targetExe));
+    }
+
     public void Dispose()
     {
         try
