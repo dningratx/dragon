@@ -6,8 +6,10 @@ namespace DraGon.Core.Services;
 
 public sealed partial class ProjectTunnelManager : IDisposable
 {
+    private sealed record ActiveTunnel(Process Process, TunnelReverseProxy Proxy);
+
     private readonly AppLogger _logger;
-    private readonly Dictionary<Guid, Process> _tunnelProcesses = [];
+    private readonly Dictionary<Guid, ActiveTunnel> _activeTunnels = [];
     private readonly Lock _lock = new();
     private Action<Action>? _uiDispatcher;
 
@@ -30,11 +32,11 @@ public sealed partial class ProjectTunnelManager : IDisposable
         {
             lock (_lock)
             {
-                return _tunnelProcesses.Values.Any(p =>
+                return _activeTunnels.Values.Any(t =>
                 {
                     try
                     {
-                        return !p.HasExited;
+                        return !t.Process.HasExited;
                     }
                     catch
                     {
@@ -103,8 +105,20 @@ public sealed partial class ProjectTunnelManager : IDisposable
             localPort = 80;
         }
 
-        var targetOrigin = $"http://127.0.0.1:{localPort}";
         var hostHeader = string.IsNullOrWhiteSpace(project.Domain) ? "localhost" : project.Domain.Trim();
+        TunnelReverseProxy? reverseProxy = null;
+
+        try
+        {
+            reverseProxy = new TunnelReverseProxy(hostHeader, localPort, _logger);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("Tunnel", $"Gagal memulai reverse proxy lokal untuk {project.Domain}", ex);
+            return (false, $"Gagal memulai reverse proxy lokal: {ex.Message}", null);
+        }
+
+        var targetOrigin = $"http://127.0.0.1:{reverseProxy.ListenPort}";
 
         DispatchToUi(() =>
         {
@@ -127,8 +141,6 @@ public sealed partial class ProjectTunnelManager : IDisposable
         psi.ArgumentList.Add("--no-autoupdate");
         psi.ArgumentList.Add("--url");
         psi.ArgumentList.Add(targetOrigin);
-        psi.ArgumentList.Add("--http-host-header");
-        psi.ArgumentList.Add(hostHeader);
 
         var process = new Process
         {
@@ -150,6 +162,7 @@ public sealed partial class ProjectTunnelManager : IDisposable
             var url = ExtractTryCloudflareUrl(data);
             if (!string.IsNullOrWhiteSpace(url))
             {
+                reverseProxy.SetPublicBaseUrl(url);
                 urlTcs.TrySetResult(url);
             }
             else if (data.Contains("ERR", StringComparison.OrdinalIgnoreCase) ||
@@ -166,9 +179,9 @@ public sealed partial class ProjectTunnelManager : IDisposable
         {
             lock (_lock)
             {
-                if (_tunnelProcesses.TryGetValue(project.Id, out var tracked) && ReferenceEquals(tracked, process))
+                if (_activeTunnels.TryGetValue(project.Id, out var tracked) && ReferenceEquals(tracked.Process, process))
                 {
-                    _tunnelProcesses.Remove(project.Id);
+                    _activeTunnels.Remove(project.Id);
                 }
             }
 
@@ -185,6 +198,7 @@ public sealed partial class ProjectTunnelManager : IDisposable
                 project.TunnelStatusText = "Tunnel nonaktif";
             });
 
+            reverseProxy.Dispose();
             process.Dispose();
         };
 
@@ -193,13 +207,14 @@ public sealed partial class ProjectTunnelManager : IDisposable
             if (!process.Start())
             {
                 ResetProjectTunnelState(project, "Gagal memulai cloudflared.");
+                reverseProxy.Dispose();
                 process.Dispose();
                 return (false, "Gagal memulai proses cloudflared.exe.", null);
             }
 
             lock (_lock)
             {
-                _tunnelProcesses[project.Id] = process;
+                _activeTunnels[project.Id] = new ActiveTunnel(process, reverseProxy);
             }
 
             process.BeginOutputReadLine();
@@ -216,6 +231,7 @@ public sealed partial class ProjectTunnelManager : IDisposable
             }
 
             var publicUrl = await urlTcs.Task;
+            reverseProxy.SetPublicBaseUrl(publicUrl);
             DispatchToUi(() =>
             {
                 project.IsTunnelStarting = false;
@@ -224,27 +240,28 @@ public sealed partial class ProjectTunnelManager : IDisposable
                 project.TunnelStatusText = "Tunnel aktif";
             });
 
-            _logger.Info("Tunnel", $"Public tunnel aktif untuk {project.Domain} -> {publicUrl}");
+            _logger.Info("Tunnel", $"Public tunnel aktif untuk {project.Domain} -> {publicUrl} (via proxy 127.0.0.1:{reverseProxy.ListenPort} -> 127.0.0.1:{localPort})");
             return (true, $"Public tunnel aktif: {publicUrl}", publicUrl);
         }
         catch (Exception ex)
         {
             _logger.Error("Tunnel", $"Gagal menjalankan tunnel untuk {project.Domain}", ex);
             await StopTunnelAsync(project);
+            reverseProxy.Dispose();
             return (false, $"Gagal menjalankan tunnel: {ex.Message}", null);
         }
     }
 
     public async Task<(bool Success, string Message)> StopTunnelAsync(ProjectItem project)
     {
-        Process? process;
+        ActiveTunnel? tunnel;
         lock (_lock)
         {
-            _tunnelProcesses.TryGetValue(project.Id, out process);
-            _tunnelProcesses.Remove(project.Id);
+            _activeTunnels.TryGetValue(project.Id, out tunnel);
+            _activeTunnels.Remove(project.Id);
         }
 
-        if (process is null)
+        if (tunnel is null)
         {
             ResetProjectTunnelState(project, "Tunnel nonaktif");
             return (true, "Tunnel sudah nonaktif.");
@@ -252,10 +269,11 @@ public sealed partial class ProjectTunnelManager : IDisposable
 
         try
         {
-            if (!process.HasExited)
+            tunnel.Proxy.Dispose();
+            if (!tunnel.Process.HasExited)
             {
-                process.Kill(entireProcessTree: true);
-                await process.WaitForExitAsync();
+                tunnel.Process.Kill(entireProcessTree: true);
+                await tunnel.Process.WaitForExitAsync();
             }
         }
         catch (Exception ex)
@@ -272,21 +290,22 @@ public sealed partial class ProjectTunnelManager : IDisposable
 
     public async Task StopAllTunnelsAsync()
     {
-        List<Process> processes;
+        List<ActiveTunnel> tunnels;
         lock (_lock)
         {
-            processes = [.. _tunnelProcesses.Values];
-            _tunnelProcesses.Clear();
+            tunnels = [.. _activeTunnels.Values];
+            _activeTunnels.Clear();
         }
 
-        foreach (var proc in processes)
+        foreach (var tunnel in tunnels)
         {
             try
             {
-                if (!proc.HasExited)
+                tunnel.Proxy.Dispose();
+                if (!tunnel.Process.HasExited)
                 {
-                    proc.Kill(entireProcessTree: true);
-                    await proc.WaitForExitAsync();
+                    tunnel.Process.Kill(entireProcessTree: true);
+                    await tunnel.Process.WaitForExitAsync();
                 }
             }
             catch
@@ -300,13 +319,13 @@ public sealed partial class ProjectTunnelManager : IDisposable
     {
         lock (_lock)
         {
-            if (_tunnelProcesses.TryGetValue(projectId, out var proc))
+            if (_activeTunnels.TryGetValue(projectId, out var tunnel))
             {
                 try
                 {
-                    if (!proc.HasExited)
+                    if (!tunnel.Process.HasExited)
                     {
-                        pid = proc.Id;
+                        pid = tunnel.Process.Id;
                         return true;
                     }
                 }
@@ -315,7 +334,8 @@ public sealed partial class ProjectTunnelManager : IDisposable
                     // Process already exited
                 }
 
-                _tunnelProcesses.Remove(projectId);
+                tunnel.Proxy.Dispose();
+                _activeTunnels.Remove(projectId);
             }
         }
 
@@ -348,22 +368,23 @@ public sealed partial class ProjectTunnelManager : IDisposable
 
     public void Dispose()
     {
-        List<Process> processes;
+        List<ActiveTunnel> tunnels;
         lock (_lock)
         {
-            processes = [.. _tunnelProcesses.Values];
-            _tunnelProcesses.Clear();
+            tunnels = [.. _activeTunnels.Values];
+            _activeTunnels.Clear();
         }
 
-        foreach (var proc in processes)
+        foreach (var tunnel in tunnels)
         {
             try
             {
-                if (!proc.HasExited)
+                tunnel.Proxy.Dispose();
+                if (!tunnel.Process.HasExited)
                 {
-                    proc.Kill(entireProcessTree: true);
+                    tunnel.Process.Kill(entireProcessTree: true);
                 }
-                proc.Dispose();
+                tunnel.Process.Dispose();
             }
             catch
             {

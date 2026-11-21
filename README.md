@@ -2,7 +2,7 @@
 
 # DraGon (.dra) — Local Development Environment
 
-[![Release](https://img.shields.io/badge/Release-v1.3.3-orange.svg)](https://github.com/dningratx/dragon/releases)
+[![Release](https://img.shields.io/badge/Release-v1.3.4-orange.svg)](https://github.com/dningratx/dragon/releases)
 [![Website](https://img.shields.io/badge/Website-dningratx.github.io%2Fdragon-success.svg)](https://dningratx.github.io/dragon/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://github.com/dningratx/dragon)
 [![Framework](https://img.shields.io/badge/.NET-10.0%20Windows-512bd4.svg)](https://dotnet.microsoft.com/)
@@ -19,15 +19,15 @@
 
 ---
 
-## 🚀 Unduh DraGon v1.3.3 Terbaru
+## 🚀 Unduh DraGon v1.3.4 Terbaru
 
 Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
 
 | Paket Distribusi | Tipe | Deskripsi | Tautan Unduh |
 | :--- | :--- | :--- | :--- |
-| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-Setup.exe) |
-| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-win-x64.zip) |
-| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.3.3.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-Patch-v1.3.3.zip) |
+| **DraGon Setup** | **Net Installer** | Installer GUI mandiri ramping tanpa runtime bawaan di awal. Pilih dan unduh komponen on-demand saat instalasi. | [⬇️ **Unduh DraGon-Setup.exe**](https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-Setup.exe) |
+| **DraGon Portable** | **ZIP Archive** | Versi portabel siap ekstrak tanpa instalasi registry Windows. | [📦 **Unduh DraGon-win-x64.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-win-x64.zip) |
+| **DraGon Patch** | **Delta Update** | Paket pembaruan inkremental ringan untuk pengguna versi sebelumnya via Auto-Updater di aplikasi. | [⚡ **DraGon-Patch-v1.3.4.zip**](https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-Patch-v1.3.4.zip) |
 
 ---
 
@@ -59,6 +59,7 @@ Dapatkan installer dan paket rilis resmi langsung dari GitHub Releases:
 
 ### 6. 🌐 Public Tunnel / Share 1-Klik (`cloudflared`)
 - Bagikan situs `.dra` lokal ke internet sementara (`https://*.trycloudflare.com`) hanya dengan 1 klik tombol **`🌐 Share`** di kartu proyek—tanpa perlu akun Cloudflare.
+- Dilengkapi **Reverse Proxy Lokal per-Tunnel** yang meneruskan `X-Forwarded-Host` / `X-Forwarded-Proto` serta otomatis menulis ulang redirect (`Location`), cookie, dan tautan domain lokal agar browser tetap bertahan di URL `https://*.trycloudflare.com` (mendukung Laravel, WordPress, dan aplikasi PHP lainnya).
 - Cocok untuk menguji webhook (Midtrans, Xendit, Stripe) maupun demo cepat ke klien.
 - Otomatis menyalakan Web Server & PHP-CGI jika belum aktif, mengunduh `cloudflared.exe` on-demand bila belum terpasang, serta menyalin URL publik ke clipboard.
 
@@ -79,7 +80,7 @@ DRAGON/
 ├── DraGon.Elevator/            # Helper CLI ringan untuk meminta elevasi UAC (hosts file)
 ├── DraGon.App/                 # Aplikasi Desktop WPF (MVVM, Dark/Light Theme, Auto-Updater)
 ├── DraGon.Installer/           # Wizard Installer Mandiri GUI (DraGon-Setup.exe)
-├── DraGon.Tests/               # Pengujian unit otomatis 59 skenario (xUnit)
+├── DraGon.Tests/               # Pengujian unit otomatis 61 skenario (xUnit)
 ├── docs/                       # Halaman dokumentasi web (GitHub Pages)
 └── scripts/
     ├── publish-release.ps1     # Skrip pembuat paket distribusi rilis portabel (ZIP)
@@ -111,7 +112,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1 -Mode Off
 powershell -ExecutionPolicy Bypass -File .\scripts\publish-release.ps1
 
 # 6. Membangun paket patch inkremental delta
-powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.3.2" -Changelog "Fitur Public Tunnel / Share 1-Klik via Cloudflare Tunnel (cloudflared)."
+powershell -ExecutionPolicy Bypass -File .\scripts\publish-patch.ps1 -Version "1.3.4" -Changelog "Perbaikan Public Tunnel agar URL tetap bertahan di trycloudflare.com."
 ```
 
 ---

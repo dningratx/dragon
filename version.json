@@ -1,15 +1,15 @@
 {
-  "version": "1.3.3",
-  "name": "DraGon v1.3.3",
-  "releaseDate": "2026-11-17",
+  "version": "1.3.4",
+  "name": "DraGon v1.3.4",
+  "releaseDate": "2026-11-21",
   "minWindowsVersion": "10.0.19041",
   "architecture": "win-x64",
-  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-Setup.exe",
-  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.3/DraGon-win-x64.zip",
+  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-Setup.exe",
+  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-win-x64.zip",
   "changelog": [
-    "Perbaikan Auto-Updater Patch: menggunakan ArgumentList pada powershell.exe -File agar path ZIP & TargetDir tidak gagal kutip dan tidak memicu loop update berulang",
-    "Perbaikan Sinkronisasi PHP & Database CLI: perintah php -v di Terminal DraGon dan Windows User PATH kini akurat mengikuti versi aktif yang dipilih (mis. PHP 8.4)",
-    "Penyempurnaan UI Dashboard Compact: ukuran jendela lebih fit (700x410), tombol aksi top bar rata kiri, dan card layanan lebih bersih tanpa teks status yang memotong judul",
-    "Fitur Public Tunnel / Share 1-Klik via Cloudflare Tunnel (cloudflared) & Net Installer Modular"
+    "Perbaikan Public Tunnel / Share 1-Klik (Cloudflare Tunnel): menambahkan reverse proxy lokal per-tunnel agar URL tetap bertahan di https://*.trycloudflare.com dan tidak redirect balik ke domain lokal (.dra)",
+    "Dukungan X-Forwarded-Proto, X-Forwarded-Host, dan X-Forwarded-Port di konfigurasi FastCGI Nginx & Apache agar Laravel, WordPress, dan aplikasi PHP mengenali URL publik HTTPS",
+    "Penulisan ulang otomatis header Location (redirect), atribut Domain pada Set-Cookie, serta URL domain lokal di respons HTML/CSS/JS/JSON saat diakses melalui Public Tunnel",
+    "Menjaga seluruh perbaikan v1.3.3 (Auto-Updater Patch, Sinkronisasi PHP CLI PATH, dan UI Dashboard Compact)"
   ]
 }

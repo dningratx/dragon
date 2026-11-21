@@ -770,4 +770,101 @@ public sealed class CoreServicesTests
             try { Directory.Delete(tempRoot, recursive: true); } catch { }
         }
     }
+
+    [Fact]
+    public void TunnelReverseProxy_RewriteHelpers_RewriteLocalRedirectsCookiesAndBodyUrls()
+    {
+        const string publicUrl = "https://gentle-dragon-42.trycloudflare.com";
+
+        // Location header rewrites
+        Assert.Equal(
+            "https://gentle-dragon-42.trycloudflare.com/login",
+            TunnelReverseProxy.RewriteLocationHeader("http://tokoku.dra/login", "tokoku.dra", 80, publicUrl));
+        Assert.Equal(
+            "https://gentle-dragon-42.trycloudflare.com/dashboard?tab=1",
+            TunnelReverseProxy.RewriteLocationHeader("https://tokoku.dra:443/dashboard?tab=1", "tokoku.dra", 80, publicUrl));
+        Assert.Equal(
+            "https://gentle-dragon-42.trycloudflare.com/admin/",
+            TunnelReverseProxy.RewriteLocationHeader("http://127.0.0.1:8080/admin/", "tokoku.dra", 8080, publicUrl));
+        Assert.Equal(
+            "https://accounts.google.com/o/oauth2/auth",
+            TunnelReverseProxy.RewriteLocationHeader("https://accounts.google.com/o/oauth2/auth", "tokoku.dra", 80, publicUrl));
+
+        // Set-Cookie domain stripping
+        Assert.Equal(
+            "laravel_session=abc123; Path=/; HttpOnly",
+            TunnelReverseProxy.RewriteSetCookieHeader("laravel_session=abc123; Domain=tokoku.dra; Path=/; HttpOnly", "tokoku.dra"));
+        Assert.Equal(
+            "wp_logged_in=xyz; Path=/",
+            TunnelReverseProxy.RewriteSetCookieHeader("wp_logged_in=xyz; Domain=.tokoku.dra; Path=/", "tokoku.dra"));
+
+        // Body URL rewriting (HTML + JSON escaped + protocol-relative, preserving external URLs)
+        const string html = """
+            <a href="http://tokoku.dra/login">Login</a>
+            <link href="https://tokoku.dra/assets/app.css" rel="stylesheet">
+            <script>const cfg = {"api":"https:\/\/tokoku.dra\/api\/v1","cdn":"https:\/\/cdn.example.com\/x"};</script>
+            <img src="//tokoku.dra/logo.png">
+            """;
+        var rewritten = TunnelReverseProxy.RewriteResponseBody(html, "tokoku.dra", 80, publicUrl);
+
+        Assert.Contains("href=\"https://gentle-dragon-42.trycloudflare.com/login\"", rewritten);
+        Assert.Contains("href=\"https://gentle-dragon-42.trycloudflare.com/assets/app.css\"", rewritten);
+        Assert.Contains("\"api\":\"https:\\/\\/gentle-dragon-42.trycloudflare.com\\/api\\/v1\"", rewritten);
+        Assert.Contains("\"cdn\":\"https:\\/\\/cdn.example.com\\/x\"", rewritten);
+        Assert.Contains("src=\"//gentle-dragon-42.trycloudflare.com/logo.png\"", rewritten);
+    }
+
+    [Fact]
+    public async Task TunnelReverseProxy_EndToEnd_ForwardsHeadersAndRewritesLocalRedirectAndHtml()
+    {
+        using var mockUpstream = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+        mockUpstream.Start();
+        var upstreamPort = ((System.Net.IPEndPoint)mockUpstream.LocalEndpoint).Port;
+
+        string? capturedRequestText = null;
+        var serverTask = Task.Run(async () =>
+        {
+            using var client = await mockUpstream.AcceptTcpClientAsync();
+            await using var stream = client.GetStream();
+            var buf = new byte[4096];
+            var read = await stream.ReadAsync(buf);
+            capturedRequestText = System.Text.Encoding.ASCII.GetString(buf, 0, read);
+
+            const string body = "<html><body><a href=\"http://tokoku.dra/home\">Home</a></body></html>";
+            var response =
+                "HTTP/1.1 302 Found\r\n" +
+                "Location: http://tokoku.dra/login\r\n" +
+                "Set-Cookie: sid=123; Domain=tokoku.dra; Path=/\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
+                $"Content-Length: {System.Text.Encoding.UTF8.GetByteCount(body)}\r\n" +
+                "Connection: close\r\n\r\n" +
+                body;
+            await stream.WriteAsync(System.Text.Encoding.UTF8.GetBytes(response));
+        });
+
+        using var proxy = new TunnelReverseProxy("tokoku.dra", upstreamPort);
+        proxy.SetPublicBaseUrl("https://gentle-dragon-42.trycloudflare.com");
+
+        using var http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{proxy.ListenPort}/");
+        req.Headers.Host = "gentle-dragon-42.trycloudflare.com";
+
+        using var resp = await http.SendAsync(req);
+        await serverTask;
+
+        Assert.Equal(System.Net.HttpStatusCode.Found, resp.StatusCode);
+        Assert.Equal("https://gentle-dragon-42.trycloudflare.com/login", resp.Headers.Location?.ToString());
+
+        Assert.True(resp.Headers.TryGetValues("Set-Cookie", out var cookies));
+        Assert.Contains("sid=123; Path=/", cookies);
+
+        var respBody = await resp.Content.ReadAsStringAsync();
+        Assert.Contains("https://gentle-dragon-42.trycloudflare.com/home", respBody);
+
+        Assert.NotNull(capturedRequestText);
+        Assert.Contains("Host: tokoku.dra", capturedRequestText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("X-Forwarded-Host: gentle-dragon-42.trycloudflare.com", capturedRequestText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("X-Forwarded-Proto: https", capturedRequestText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("X-Forwarded-Port: 443", capturedRequestText, StringComparison.OrdinalIgnoreCase);
+    }
 }

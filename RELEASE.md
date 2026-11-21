@@ -1,13 +1,28 @@
-# DraGon v1.3.3 — Perbaikan Auto-Updater Patch, Sinkronisasi PHP CLI Terminal & UI Compact
+# DraGon v1.3.4 — Perbaikan Public Tunnel Reverse Proxy (`*.trycloudflare.com`) & Dukungan `X-Forwarded-*`
 
-> **Tanggal Rilis:** 17 November 2026  
-> **Versi:** `v1.3.3`  
+> **Tanggal Rilis:** 21 November 2026  
+> **Versi:** `v1.3.4`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.3.3
+## 🌟 Sorotan Pembaruan v1.3.4
+
+### Perbaikan Public Tunnel / Share 1-Klik (`cloudflared`)
+- **Reverse Proxy Lokal per-Tunnel (`TunnelReverseProxy`):** Mengganti penggunaan `--http-host-header` di `cloudflared` dengan reverse proxy HTTP/1.1 lokal ringan (`127.0.0.1:<port acak>`) per proyek, sehingga browser tetap bertahan di URL `https://*.trycloudflare.com` dan tidak lagi redirect balik ke domain lokal (`.dra`).
+- **Dukungan `X-Forwarded-Proto`, `X-Forwarded-Host`, & `X-Forwarded-Port` pada Nginx dan Apache:**
+  - Konfigurasi Nginx kini dilengkapi `map` untuk meneruskan `HTTPS`, `HTTP_HOST`, `SERVER_NAME`, dan `SERVER_PORT` ke PHP FastCGI secara otomatis saat request datang melalui tunnel.
+  - Konfigurasi Apache dilengkapi `SetEnvIfNoCase` dan `ProxyFCGISetEnvIf` agar framework PHP mengenali protokol HTTPS dan host publik tunnel.
+- **Penulisan Ulang Otomatis Redirect, Cookie, & URL Respons:**
+  - Menulis ulang header `Location` (`301`/`302`/`307`/`308`) yang mengarah ke domain lokal (`.dra`, `127.0.0.1`, `localhost`) menjadi URL publik `https://*.trycloudflare.com`.
+  - Menghapus atribut `Domain=<domain lokal>` pada `Set-Cookie` agar sesi login tetap aktif di domain publik.
+  - Menulis ulang referensi URL domain lokal pada respons `HTML`, `CSS`, `JS`, dan `JSON` (membantu WordPress & Laravel dengan `APP_URL` lokal agar aset dan form tetap bekerja tanpa ubah konfigurasi manual).
+
+> **Catatan Setelah Upgrade:**  
+> Restart layanan **Nginx** / **Apache** sekali di DraGon agar konfigurasi `X-Forwarded-*` terbaru diterapkan sebelum menggunakan tombol **`🌐 Share`**.
+
+### Pembaruan Sebelumnya (v1.3.3)
 
 ### Perbaikan Bug & Sinkronisasi Sistem
 - **Perbaikan Auto-Updater Patch (`PrepareAndLaunchPatchUpdater`):** Mengganti pengoperan argumen `powershell.exe -File` dari tanda kutip tunggal manual ke `ProcessStartInfo.ArgumentList` (`UseShellExecute = false`), sehingga `Expand-Archive` tidak lagi gagal membaca path ZIP dan tidak memicu notifikasi update berulang setelah patch dipasang.
@@ -72,7 +87,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.3.3.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi `v1.3.3+`. |
+| **`DraGon-Patch-v1.3.4.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi `v1.3.3+`. |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---
