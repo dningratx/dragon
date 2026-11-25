@@ -83,7 +83,7 @@ public partial class RuntimePackageInfo : ObservableObject
         }
     }
 
-    public string SelectedVersionStatusText => IsSelectedVersionInstalled ? "✔ Terpasang" : "○ Belum Terpasang";
+    public string SelectedVersionStatusText => IsSelectedVersionInstalled ? "Terpasang" : "Belum Terpasang";
 
     public string DownloadButtonText
     {
@@ -91,10 +91,10 @@ public partial class RuntimePackageInfo : ObservableObject
         {
             if (IsAvailable && (AvailableVersions.Count == 0 || IsSelectedVersionInstalled))
             {
-                return "✔ Terpasang";
+                return "Terpasang";
             }
 
-            return "⬇ Pasang";
+            return "Pasang";
         }
     }
 
@@ -112,16 +112,16 @@ public partial class RuntimePackageInfo : ObservableObject
         }
     }
 
-    public string WebsiteOrUpdateActionText => IsAvailable ? "🌐 Versi Terbaru" : "🌐 Situs Resmi";
+    public string WebsiteOrUpdateActionText => IsAvailable ? "Versi Terbaru" : "Situs Resmi";
     public string WebsiteOrUpdateActionToolTip => IsAvailable
         ? "Buka halaman rilis resmi untuk melihat dan mengunduh versi terbaru"
         : "Buka situs resmi dan dokumentasi paket ini";
 
     public string StatusBadgeText => !IsAvailable
-        ? "○ Belum Terpasang"
+        ? "Belum Terpasang"
         : IsFromSystemPath
-            ? "✔ Terdeteksi (System PATH)"
-            : "✔ Terpasang di DraGon";
+            ? "System PATH"
+            : "Terpasang";
 
     partial void OnSelectedDownloadVersionChanged(PackageVersionOption? value)
     {

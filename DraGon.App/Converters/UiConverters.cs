@@ -15,11 +15,13 @@ public sealed class NotificationToneToBrushConverter : IValueConverter
         var hex = tone switch
         {
             NotificationTone.Success => "#10B981",
-            NotificationTone.Warning => "#F59E0B",
-            NotificationTone.Error => "#EF4444",
-            _ => "#38BDF8"
+            NotificationTone.Warning => "#D97706",
+            NotificationTone.Error => "#DC2626",
+            _ => "#60A5FA"
         };
-        return new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        brush.Freeze();
+        return brush;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
@@ -33,15 +35,17 @@ public sealed class ServiceStatusToBrushConverter : IValueConverter
         var status = value is ServiceStatus s ? s : ServiceStatus.Stopped;
         var hex = status switch
         {
-            ServiceStatus.Running => "#10B981",       // Emerald
-            ServiceStatus.Starting => "#38BDF8",      // Sky Blue
-            ServiceStatus.Stopping => "#F59E0B",      // Amber
-            ServiceStatus.MissingRuntime => "#F59E0B",// Amber
-            ServiceStatus.PortConflict => "#EF4444",  // Red
-            ServiceStatus.Error => "#EF4444",         // Red
-            _ => "#64748B"                            // Slate
+            ServiceStatus.Running => "#10B981",
+            ServiceStatus.Starting => "#60A5FA",
+            ServiceStatus.Stopping => "#D97706",
+            ServiceStatus.MissingRuntime => "#D97706",
+            ServiceStatus.PortConflict => "#DC2626",
+            ServiceStatus.Error => "#DC2626",
+            _ => "#71717A"
         };
-        return new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        brush.Freeze();
+        return brush;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
@@ -56,12 +60,14 @@ public sealed class DomainStatusToBrushConverter : IValueConverter
         var hex = status switch
         {
             DomainSyncStatus.Synced => "#10B981",
-            DomainSyncStatus.NotSynced => "#F59E0B",
-            DomainSyncStatus.ExternalConflict => "#EF4444",
-            DomainSyncStatus.InvalidDomain => "#EF4444",
-            _ => "#64748B"
+            DomainSyncStatus.NotSynced => "#D97706",
+            DomainSyncStatus.ExternalConflict => "#DC2626",
+            DomainSyncStatus.InvalidDomain => "#DC2626",
+            _ => "#71717A"
         };
-        return new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+        brush.Freeze();
+        return brush;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

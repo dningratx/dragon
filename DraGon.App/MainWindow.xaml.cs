@@ -69,7 +69,7 @@ public partial class MainWindow : Window
                 }
             });
 
-            var reloadItem = new Forms.ToolStripMenuItem("🔄 Reload Services");
+            var reloadItem = new Forms.ToolStripMenuItem("↻ Reload Services");
             reloadItem.Click += (_, _) => Dispatcher.Invoke(() =>
             {
                 if (_viewModel.ReloadServicesCommand.CanExecute(null))

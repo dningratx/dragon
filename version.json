@@ -1,15 +1,15 @@
 {
-  "version": "1.3.4",
-  "name": "DraGon v1.3.4",
-  "releaseDate": "2026-11-21",
+  "version": "1.3.5",
+  "name": "DraGon v1.3.5",
+  "releaseDate": "2026-11-25",
   "minWindowsVersion": "10.0.19041",
   "architecture": "win-x64",
-  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-Setup.exe",
-  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.4/DraGon-win-x64.zip",
+  "downloadUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.5/DraGon-Setup.exe",
+  "portableUrl": "https://github.com/dningratx/dragon/releases/download/v1.3.5/DraGon-win-x64.zip",
   "changelog": [
-    "Perbaikan Public Tunnel / Share 1-Klik (Cloudflare Tunnel): menambahkan reverse proxy lokal per-tunnel agar URL tetap bertahan di https://*.trycloudflare.com dan tidak redirect balik ke domain lokal (.dra)",
-    "Dukungan X-Forwarded-Proto, X-Forwarded-Host, dan X-Forwarded-Port di konfigurasi FastCGI Nginx & Apache agar Laravel, WordPress, dan aplikasi PHP mengenali URL publik HTTPS",
-    "Penulisan ulang otomatis header Location (redirect), atribut Domain pada Set-Cookie, serta URL domain lokal di respons HTML/CSS/JS/JSON saat diakses melalui Public Tunnel",
-    "Menjaga seluruh perbaikan v1.3.3 (Auto-Updater Patch, Sinkronisasi PHP CLI PATH, dan UI Dashboard Compact)"
+    "Redesign antarmuka desktop DraGon menjadi compact dan minimalis (680x400, sidebar 118px, tipografi Segoe UI Variable & Cascadia Mono)",
+    "Palet tema Dark & Light netral baru dengan satu aksen Dragon Ember (#EA580C), perbaikan konsistensi warna banner update pada Light Theme, serta GhostButtonStyle untuk aksi sekunder",
+    "Penghapusan seluruh emoji dekoratif pada tombol, sidebar, label, dan status agar tampilan lebih bersih, profesional, dan mudah dipindai",
+    "Tata letak lebih ringkas di seluruh 5 menu: kartu layanan 2 kolom, PHP & Database Version Switcher berdampingan, grid port 3x2 di Pengaturan, serta integrasi Antislop-AI & DESIGN.md di repositori"
   ]
 }

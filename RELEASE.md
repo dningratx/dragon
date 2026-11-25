@@ -1,13 +1,25 @@
-# DraGon v1.3.4 — Perbaikan Public Tunnel Reverse Proxy (`*.trycloudflare.com`) & Dukungan `X-Forwarded-*`
+# DraGon v1.3.5 — Redesign Antarmuka Compact & Minimalis + Antislop-AI
 
-> **Tanggal Rilis:** 21 November 2026  
-> **Versi:** `v1.3.4`  
+> **Tanggal Rilis:** 25 November 2026  
+> **Versi:** `v1.3.5`  
 > **Arsitektur:** Windows x64 (`win-x64`)  
 > **Target Framework:** .NET 10 (LTS)
 
 ---
 
-## 🌟 Sorotan Pembaruan v1.3.4
+## Sorotan Pembaruan v1.3.5
+
+### Redesign Antarmuka Compact & Minimalis
+- **Tata Letak Lebih Padat & Terstruktur:** Ukuran jendela default `680×400` dengan sidebar monokrom `118px`, garis indikator aktif `2px`, serta top bar aksi layanan (`▶ Start`, `■ Stop`, `↻ Reload`, `Segarkan`) yang dipisahkan dari pintasan cepat (`PMA`, `DB`, `PHP Info`).
+- **Palet Netral Dark & Light Theme:** Menggunakan palet netral charcoal (`#0E0E10`–`#222227`) untuk Dark Theme dan zinc/putih (`#F6F6F7`–`#FFFFFF`) untuk Light Theme dengan satu aksen **Dragon Ember** (`#EA580C`). Memperbaiki warna banner pembaruan agar tetap terbaca baik pada Light Theme.
+- **Tipografi & Hierarki Bersih:** Menggunakan `Segoe UI Variable Text` untuk UI dan `Cascadia Mono` untuk port, PID, path, ekstensi PHP, serta log. Seluruh emoji dekoratif pada tombol, navigasi, dan label dihapus demi keterbacaan yang konsisten.
+- **Efisiensi Ruang di Seluruh 5 Menu:**
+  - *Dashboard:* Kartu layanan 2 kolom dengan metadata port/PID/versi inline.
+  - *Services:* *PHP Version Switcher* dan *Database Version Switcher* diletakkan berdampingan (2 kolom) untuk menghemat ruang vertikal.
+  - *Settings:* Input port ditata dalam grid `3×2` yang lebih lega dan mudah dibaca.
+- **Standar Desain & Kode (`Antislop-AI` + `DESIGN.md`):** Memasang aturan `antislop-ui` dan `antislop-code` (v3.2.32) beserta [DESIGN.md](DESIGN.md) untuk menjaga konsistensi desain dan kebersihan komentar kode.
+
+### Pembaruan Sebelumnya (v1.3.4)
 
 ### Perbaikan Public Tunnel / Share 1-Klik (`cloudflared`)
 - **Reverse Proxy Lokal per-Tunnel (`TunnelReverseProxy`):** Mengganti penggunaan `--http-host-header` di `cloudflared` dengan reverse proxy HTTP/1.1 lokal ringan (`127.0.0.1:<port acak>`) per proyek, sehingga browser tetap bertahan di URL `https://*.trycloudflare.com` dan tidak lagi redirect balik ke domain lokal (`.dra`).
@@ -87,7 +99,7 @@
 | :--- | :--- | :--- |
 | **`DraGon-Setup.exe`** / **`DraGon-WebSetup.exe`** | **Net Installer (Online)** | Installer GUI mandiri ramping dengan pilihan unduhan komponen on-demand. |
 | **`DraGon-win-x64.zip`** | **Portable ZIP** | Paket arsip portabel siap ekstrak tanpa instalasi registry. |
-| **`DraGon-Patch-v1.3.4.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi `v1.3.3+`. |
+| **`DraGon-Patch-v1.3.5.zip`** | **Delta / Patch** | Paket pembaruan kecil untuk pengguna versi `v1.3.3+`. |
 | **`update-manifest.json`** | **Update Feed** | Metadata manifes untuk endpoint update server DraGon. |
 
 ---

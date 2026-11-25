@@ -153,8 +153,8 @@ public partial class ProjectItem : ObservableObject
 
     [JsonIgnore]
     public string TunnelButtonText => IsTunnelStarting
-        ? "⏳ Tunnel..."
-        : (IsTunnelRunning ? "⏹ Stop Share" : "🌐 Share");
+        ? "Tunnel..."
+        : (IsTunnelRunning ? "■ Stop Share" : "Share");
 
     [JsonIgnore]
     public string TunnelButtonTooltip => IsTunnelRunning || IsTunnelStarting

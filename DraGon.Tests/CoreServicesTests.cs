@@ -350,14 +350,14 @@ public sealed class CoreServicesTests
         // When not installed
         Assert.False(pkg.IsAvailable);
         Assert.True(pkg.CanDownloadAndInstall);
-        Assert.Equal("⬇ Pasang", pkg.DownloadButtonText);
-        Assert.Equal("🌐 Situs Resmi", pkg.WebsiteOrUpdateActionText);
+        Assert.Equal("Pasang", pkg.DownloadButtonText);
+        Assert.Equal("Situs Resmi", pkg.WebsiteOrUpdateActionText);
 
         // When installed
         pkg.IsAvailable = true;
         Assert.False(pkg.CanDownloadAndInstall);
-        Assert.Equal("✔ Terpasang", pkg.DownloadButtonText);
-        Assert.Equal("🌐 Versi Terbaru", pkg.WebsiteOrUpdateActionText);
+        Assert.Equal("Terpasang", pkg.DownloadButtonText);
+        Assert.Equal("Versi Terbaru", pkg.WebsiteOrUpdateActionText);
 
         // When installing
         pkg.IsAvailable = false;
@@ -404,8 +404,8 @@ public sealed class CoreServicesTests
 
         Assert.False(pkg.IsSelectedVersionInstalled);
         Assert.True(pkg.CanDownloadAndInstall);
-        Assert.Equal("⬇ Pasang", pkg.DownloadButtonText);
-        Assert.Equal("○ Belum Terpasang", pkg.SelectedVersionStatusText);
+        Assert.Equal("Pasang", pkg.DownloadButtonText);
+        Assert.Equal("Belum Terpasang", pkg.SelectedVersionStatusText);
 
         // Saat versi yang cocok terdeteksi (misal 8.3)
         pkg.SelectedDownloadVersion = ver83;
@@ -414,8 +414,8 @@ public sealed class CoreServicesTests
 
         Assert.True(pkg.IsSelectedVersionInstalled);
         Assert.False(pkg.CanDownloadAndInstall);
-        Assert.Equal("✔ Terpasang", pkg.DownloadButtonText);
-        Assert.Equal("✔ Terpasang", pkg.SelectedVersionStatusText);
+        Assert.Equal("Terpasang", pkg.DownloadButtonText);
+        Assert.Equal("Terpasang", pkg.SelectedVersionStatusText);
     }
 
     [Fact]
@@ -725,12 +725,12 @@ public sealed class CoreServicesTests
         Assert.True(item.CanStartTunnel);
         Assert.False(item.CanStopTunnel);
         Assert.False(item.HasPublicTunnelUrl);
-        Assert.Equal("🌐 Share", item.TunnelButtonText);
+        Assert.Equal("Share", item.TunnelButtonText);
 
         item.IsTunnelStarting = true;
         Assert.False(item.CanStartTunnel);
         Assert.True(item.CanStopTunnel);
-        Assert.Equal("⏳ Tunnel...", item.TunnelButtonText);
+        Assert.Equal("Tunnel...", item.TunnelButtonText);
 
         item.IsTunnelStarting = false;
         item.IsTunnelRunning = true;
@@ -738,7 +738,7 @@ public sealed class CoreServicesTests
         Assert.False(item.CanStartTunnel);
         Assert.True(item.CanStopTunnel);
         Assert.True(item.HasPublicTunnelUrl);
-        Assert.Equal("⏹ Stop Share", item.TunnelButtonText);
+        Assert.Equal("■ Stop Share", item.TunnelButtonText);
     }
 
     [Fact]
